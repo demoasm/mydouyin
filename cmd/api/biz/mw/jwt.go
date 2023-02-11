@@ -22,7 +22,7 @@ func InitJWT() {
 		//用于设置签名密钥*
 		Key: []byte(consts.SecretKey),
 		//用于设置token的获取源，可选header、query、cookie、param、form 默认header: Authorization
-		TokenLookup: "header: Authorization, query: token, cookie: jwt",
+		TokenLookup: "header: Authorization, query: token, form: token, cookie: jwt",
 		//用于设置从header中获取token时的前缀，默认为Bearer
 		TokenHeadName: "Bearer",
 		//设置获取当前时间的函数

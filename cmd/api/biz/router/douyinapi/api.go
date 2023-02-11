@@ -15,11 +15,26 @@ import (
 
 // Register register routes based on the IDL 'api.${HTTP Method}' annotation.
 func Register(r *server.Hertz) {
-
+	r.Static("/static", "/home/mao/Desktop/douyin")
+	// r.StaticFS("/video", &app.FS{Root: "./", GenerateIndexPages: true})
+	// r.StaticFile("/staticFile","/home/mao/Desktop/douyin/staticFile")
 	root := r.Group("/", rootMw()...)
 	{
 		_douyin := root.Group("/douyin", _douyinMw()...)
 		{
+			{
+				_feed := _douyin.Group("/feed")
+				_feed.GET("/", douyinapi.GetFeed)
+			}
+			_publish := _douyin.Group("/publish")
+			{
+				_list := _publish.Group("/list")
+				_list.GET("/", douyinapi.GetPublishList)
+			}
+			{
+				_action := _publish.Group("/action")
+				_action.POST("/", douyinapi.PublishVideo)
+			}
 			_user := _douyin.Group("/user", _userMw()...)
 			_user.GET("/", append(_getuserMw(), douyinapi.GetUser)...)
 			{
