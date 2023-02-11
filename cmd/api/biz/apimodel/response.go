@@ -64,3 +64,54 @@ func (res *GetUserResponse) SetErr(err error) {
 	res.StatusCode = Err.ErrCode
 	res.StatusMsg = Err.ErrMsg
 }
+
+// @router /douyin/feed/ [GET]
+type GetFeedResponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	NextTime   int64   `form:"next_time" json:"next_time" query:"next_time"`
+	VideoList  []Video `form:"video_list" json:"video_list" query:"video_list"`
+}
+
+func (res *GetFeedResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *GetFeedResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+// @router /douyin/publish/action/ [POST]
+type PublishVideoResponse struct {
+	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
+}
+
+func (res *PublishVideoResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *PublishVideoResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+// @router /douyin/publish/list/ [GET]
+type GetPublishListResponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	VideoList  []Video `form:"video_list" json:"video_list" query:"video_list"`
+}
+
+func (res *GetPublishListResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *GetPublishListResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
