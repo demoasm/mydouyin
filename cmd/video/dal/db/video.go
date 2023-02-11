@@ -32,7 +32,6 @@ func MGetVideos(ctx context.Context, videoIDs []int64) ([]*Video, error) {
 	if len(videoIDs) == 0 {
 		return res, nil
 	}
-
 	if err := DB.WithContext(ctx).Where("id in ?", videoIDs).Find(&res).Error; err != nil {
 		return nil, err
 	}
@@ -42,7 +41,7 @@ func MGetVideos(ctx context.Context, videoIDs []int64) ([]*Video, error) {
 // GetFeed multiple get list of video info
 func GetFeed(ctx context.Context, latest_time string) ([]*Video, error) {
 	res := make([]*Video, 0)
-	if err := DB.WithContext(ctx).Where("created_at >= ?", latest_time).Limit(30).Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("created_at <= ?", latest_time).Limit(30).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
@@ -51,7 +50,6 @@ func GetFeed(ctx context.Context, latest_time string) ([]*Video, error) {
 // MGetVideos multiple get list of video info
 func MGetVideosbyAuthor(ctx context.Context, authorID int64) ([]*Video, error) {
 	res := make([]*Video, 0)
-
 	if err := DB.WithContext(ctx).Where("author = ", authorID).Find(&res).Error; err != nil {
 		return nil, err
 	}
