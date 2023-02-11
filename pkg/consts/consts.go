@@ -2,10 +2,10 @@ package consts
 
 const (
 	UserTableName   = "user"
+	VideoTableName  = "video"
 	SecretKey       = "secret key"
 	IdentityKey     = "id"
 	Total           = "total"
-	Notes           = "notes"
 	ApiServiceName  = "douyinapi"
 	UserServiceName = "douyinuser"
 	MySQLDefaultDSN = "douyin:douyin@tcp(localhost:3306)/douyin?charset=utf8&parseTime=True&loc=Local"
