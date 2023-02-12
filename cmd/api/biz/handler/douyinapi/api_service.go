@@ -86,11 +86,15 @@ func GetPublishList(ctx context.Context, c *app.RequestContext) {
 // Publish Video
 // @router /douyin/publish/action/ [POST]
 func PublishVideo(ctx context.Context, c *app.RequestContext) {
+	userid, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
 	var err error
 	var req apimodel.PublishVideoRequest
 	err = c.BindAndValidate(&req)
-	userid, exists := c.Get(consts.IdentityKey)
-	if err != nil || !exists {
+	if err != nil {
 		// c.String(consts.StatusBadRequest, err.Error())
 		SendResponse(c, err, nil)
 		return
