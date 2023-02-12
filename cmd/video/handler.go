@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"mydouyin/cmd/video/pack"
+	"mydouyin/cmd/video/service"
 	douyinvideo "mydouyin/kitex_gen/douyinvideo"
+	"mydouyin/pkg/errno"
 )
 
 // VideoServiceImpl implements the last service interface defined in the IDL.
@@ -11,24 +14,60 @@ type VideoServiceImpl struct{}
 // CreateVideo implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) CreateVideo(ctx context.Context, req *douyinvideo.CreateVideoRequest) (resp *douyinvideo.CreateVideoResponse, err error) {
 	// TODO: Your code here...
-	return
+	resp = new(douyinvideo.CreateVideoResponse)
+	if err = req.IsValid(); err != nil {
+		resp.BaseResp = pack.BuildBaseResp(errno.ParamErr)
+		return resp, nil
+	}
+	err = service.NewCreateVideoService(ctx).CreateVideo(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
 }
 
 // GetFeed implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (resp *douyinvideo.GetFeedResponse, err error) {
-	// TODO: Your code here...
-	return
+	resp = new(douyinvideo.GetFeedResponse)
+	var videos []*douyinvideo.Video
+	var nextTime int64
+	nextTime, videos, err = service.NewGetFeedService(ctx).GetFeed(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.NextTime = nextTime
+	resp.VideoList = videos
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
 }
 
 // GetList implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) GetList(ctx context.Context, req *douyinvideo.GetListRequest) (resp *douyinvideo.GetListResponse, err error) {
-	// TODO: Your code here...
-	//我改了一点
-	return
+	resp = new(douyinvideo.GetListResponse)
+	var videos []*douyinvideo.Video
+	videos, err = service.NewGetListService(ctx).GetList(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.VideoList = videos
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
 }
 
 // MGetVideoUser implements the VideoServiceImpl interface.
 func (s *VideoServiceImpl) MGetVideoUser(ctx context.Context, req *douyinvideo.MGetVideoRequest) (resp *douyinvideo.MGetVideoResponse, err error) {
-	// TODO: Your code here...
-	return
+	resp = new(douyinvideo.MGetVideoResponse)
+	var videos []*douyinvideo.Video
+	videos, err = service.NewMGetVideoService(ctx).MGetVideo(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.Videos = videos
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
 }
