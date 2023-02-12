@@ -3,6 +3,7 @@ package apimodel
 import (
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
+	"mydouyin/pkg/consts"
 )
 
 type User struct {
@@ -38,8 +39,8 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 	return &Video{
 		VideoID: douyin_video.VideoId,
 		// Author:        douyin_video.Author,
-		PlayUrl:       douyin_video.PlayUrl,
-		CoverUrl:      douyin_video.CoverUrl,
+		PlayUrl:       consts.CDNURL + douyin_video.PlayUrl,
+		CoverUrl:      consts.CDNURL + douyin_video.CoverUrl,
 		FavoriteCount: int(douyin_video.FavoriteCount),
 		CommentCount:  int(douyin_video.CommentCount),
 		IsFavorite:    douyin_video.IsFavorite,

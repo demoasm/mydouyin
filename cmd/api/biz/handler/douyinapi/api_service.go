@@ -86,7 +86,7 @@ func GetPublishList(ctx context.Context, c *app.RequestContext) {
 // Publish Video
 // @router /douyin/publish/action/ [POST]
 func PublishVideo(ctx context.Context, c *app.RequestContext) {
-	userid, exists := c.Get(consts.IdentityKey)
+	user, exists := c.Get(consts.IdentityKey)
 	if !exists {
 		SendResponse(c, errno.AuthorizationFailedErr, nil)
 		return
@@ -108,7 +108,7 @@ func PublishVideo(ctx context.Context, c *app.RequestContext) {
 	resp := new(apimodel.PublishVideoResponse)
 
 	err = rpc.PublishVideo(context.Background(), &douyinvideo.CreateVideoRequest{
-		Author:   userid.(int64),
+		Author:   user.(*apimodel.User).UserID,
 		PlayUrl:  videourl,
 		CoverUrl: coverurl,
 		Title:    req.Title,

@@ -3,11 +3,12 @@ package douyinvideo
 import (
 	"bytes"
 	"fmt"
+	"mydouyin/pkg/consts"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
-	"net/url"
 )
 
 // unused protection
@@ -29,15 +30,15 @@ func (p *Video) IsValid() error {
 }
 
 func (p *CreateVideoRequest) IsValid() error {
-	if len(p.Title) <= 0{
+	if len(p.Title) <= 0 {
 		return fmt.Errorf("field Title min_len rule failed, current value: %d", len(p.Title))
 	}
-	_, err1 := url.ParseRequestURI(p.PlayUrl)
-	if err1 != nil{
+	_, err1 := url.ParseRequestURI(consts.CDNURL + p.PlayUrl)
+	if err1 != nil {
 		return fmt.Errorf("field PlayerUrl failed, current value: %s", p.PlayUrl)
 	}
-	_, err2 := url.ParseRequestURI(p.CoverUrl)
-	if err2 != nil{
+	_, err2 := url.ParseRequestURI(consts.CDNURL + p.CoverUrl)
+	if err2 != nil {
 		return fmt.Errorf("field CoverUrl failed, current value: %s", p.CoverUrl)
 	}
 	return nil
@@ -51,4 +52,3 @@ func (p *CreateVideoResponse) IsValid() error {
 	}
 	return nil
 }
-

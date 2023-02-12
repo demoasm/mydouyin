@@ -50,7 +50,7 @@ func GetFeed(ctx context.Context, latest_time string) ([]*Video, error) {
 // MGetVideos multiple get list of video info
 func MGetVideosbyAuthor(ctx context.Context, authorID int64) ([]*Video, error) {
 	res := make([]*Video, 0)
-	if err := DB.WithContext(ctx).Where("author = ", authorID).Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("author = ?", authorID).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

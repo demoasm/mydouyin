@@ -30,5 +30,5 @@ type PublishVideoRequest struct {
 
 type GetPublishListRequest struct {
 	Token  string `json:"query" query:"token"`
-	UserId string `json:"user_id" query:"userId"`
+	UserId string `json:"user_id" query:"user_id"`
 }
