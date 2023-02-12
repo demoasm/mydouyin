@@ -12,7 +12,8 @@ import (
 )
 
 type VideoHandel struct {
-	Root string
+	Root         string
+	RelativePath string
 }
 
 var VH *VideoHandel
@@ -20,6 +21,7 @@ var VH *VideoHandel
 func Init() {
 	VH = new(VideoHandel)
 	VH.Root = "/home/mao/Desktop/douyin/static/"
+	VH.RelativePath = "static/"
 }
 
 func (vh *VideoHandel) UpLoadFile(file *multipart.FileHeader) (videourl, coverurl string, err error) {
@@ -49,7 +51,7 @@ func (vh *VideoHandel) UpLoadFile(file *multipart.FileHeader) (videourl, coverur
 	}
 
 	//截取封面
-	snapshotPath := vh.Root + "cover/" + time.Now().Format("2006-01-02 15:04:05") + ".jpg"
+	cover_name := time.Now().Format("2006-01-02 15:04:05") + ".jpg"
 	// cmd := exec.Command("ffmpeg", "-i", vh.Root+"video/"+name, "-vf", "select=eq(n,100)", "-vframes", "1", snapshotPath)
 	buf := bytes.NewBuffer(nil)
 	err = ffmpeg.Input(vh.Root+"video/"+name).
@@ -59,10 +61,10 @@ func (vh *VideoHandel) UpLoadFile(file *multipart.FileHeader) (videourl, coverur
 	if err != nil {
 		return
 	}
-	coverfile, err := os.Create(snapshotPath)
+	coverfile, err := os.Create(vh.Root + "cover/" + cover_name)
 	if err != nil {
 		return
 	}
 	coverfile.Write(buf.Bytes())
-	return vh.Root + "video/" + name, snapshotPath, nil
+	return vh.RelativePath + "video/" + name, vh.RelativePath + "cover/" + cover_name, nil
 }

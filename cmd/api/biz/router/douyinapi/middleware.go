@@ -5,6 +5,7 @@ package Douyinapi
 import (
 	"context"
 	"fmt"
+	"mydouyin/cmd/api/biz/mw"
 	"mydouyin/pkg/errno"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -75,4 +76,10 @@ func _registerMw() []app.HandlerFunc {
 func _createuserMw() []app.HandlerFunc {
 	// your code...
 	return nil
+}
+
+func _publishMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
 }

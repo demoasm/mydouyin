@@ -26,7 +26,7 @@ func Register(r *server.Hertz) {
 				_feed := _douyin.Group("/feed")
 				_feed.GET("/", douyinapi.GetFeed)
 			}
-			_publish := _douyin.Group("/publish")
+			_publish := _douyin.Group("/publish", _publishMw()...)
 			{
 				_list := _publish.Group("/list")
 				_list.GET("/", douyinapi.GetPublishList)
