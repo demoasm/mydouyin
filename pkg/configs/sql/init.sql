@@ -29,3 +29,18 @@ CREATE TABLE `video`
     KEY          `idx_author_id` (`author`) COMMENT 'Author id index',
     CONSTRAINT   `author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Video information table';
+
+CREATE TABLE `relation`
+(
+    `id`          bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `follow_id`   bigint unsigned NOT NULL COMMENT '被关注的用户ID',
+    `follower_id` bigint unsigned NOT NULL COMMENT '粉丝的用户ID',
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'video upload time',
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'vidoe update time',
+    `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'video delete time',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY   (`follow_id`, `follower_id`) COMMENT 'Author id index',
+    KEY          (`follower_id`) COMMENT 'Author id index',
+    CONSTRAINT   `follow` FOREIGN KEY (`follow_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT   `follower` FOREIGN KEY (`follower_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='User relation table';

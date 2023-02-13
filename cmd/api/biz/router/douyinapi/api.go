@@ -45,6 +45,17 @@ func Register(r *server.Hertz) {
 				_register := _user.Group("/register", _registerMw()...)
 				_register.POST("/", append(_createuserMw(), douyinapi.CreateUser)...)
 			}
+			_relation := _douyin.Group("/relation", _relationMw()...)
+			{
+				_action := _relation.Group("/action")
+				_action.POST("/", douyinapi.RelationAction)
+			}
+			{
+				_follow := _relation.Group("/follow")
+				_follow.GET("/list/", douyinapi.FollowList)
+				_follower := _relation.Group("/follower")
+				_follower.GET("/list/", douyinapi.FollowerList)
+			}
 		}
 	}
 }
