@@ -20,7 +20,7 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/home/mao/Desktop/douyin/static/"
+	VH.Root = "/mnt/d/Documents/demos/mydouyin/static/"
 	VH.RelativePath = "static/"
 }
 
