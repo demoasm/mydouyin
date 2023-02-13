@@ -12,6 +12,7 @@ import (
 	videohandel "mydouyin/cmd/api/biz/videoHandel"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
+	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 
@@ -182,5 +183,110 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp.User = *user
+	err = errno.Success
+}
+
+// @router /douyin/relation/action/ [POST]
+func RelationAction(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.RelationActionRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	resp := new(apimodel.RelationActionResponse)
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	userId := user.(*apimodel.User).UserID
+	to_user_id, err := strconv.Atoi(req.ToUserId)
+	if err != nil {
+		err = errno.ParamErr
+		return
+	}
+	switch req.ActionType {
+	case "1":
+		err = rpc.CreateRelation(ctx, &relation.CreateRelationRequest{
+			FollowId:   int64(to_user_id),
+			FollowerId: userId,
+		})
+		if err != nil {
+			return
+		}
+	case "2":
+		err = rpc.DeleteRelation(ctx, &relation.DeleteRelationRequest{
+			FollowId:   int64(to_user_id),
+			FollowerId: userId,
+		})
+		if err != nil {
+			return
+		}
+	default:
+		err = errno.ParamErr
+		return
+	}
+	err = errno.Success
+}
+
+// @router /douyin/relation/follow/list/ [GET]
+func FollowList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.FollowAndFollowerListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	resp := new(apimodel.FollowAndFollowerListReponse)
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	id, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		err = errno.ParamErr
+		return
+	}
+	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{int64(id)})
+	if err1 != nil {
+		err = err1
+		return
+	}
+	resp.UserList = users
+	err = errno.Success
+}
+
+// @router /douyin/relation/follower/list/ [GET]
+func FollowerList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.FollowAndFollowerListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	resp := new(apimodel.FollowAndFollowerListReponse)
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	id, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		err = errno.ParamErr
+		return
+	}
+	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	if err1 != nil {
+		err = err1
+		return
+	}
+	resp.UserList = users
 	err = errno.Success
 }

@@ -115,3 +115,35 @@ func (res *GetPublishListResponse) SetErr(err error) {
 	res.StatusCode = Err.ErrCode
 	res.StatusMsg = Err.ErrMsg
 }
+
+// @router /douyin/relation/action/ [POST]
+type RelationActionResponse struct {
+	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
+}
+
+func (res *RelationActionResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *RelationActionResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+type FollowAndFollowerListReponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	UserList   []*User `form:"user_list" json:"user_list" query:"user_list"`
+}
+
+func (res *FollowAndFollowerListReponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *FollowAndFollowerListReponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
