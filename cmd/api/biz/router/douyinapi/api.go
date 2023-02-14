@@ -3,8 +3,10 @@
 package Douyinapi
 
 import (
-	"github.com/cloudwego/hertz/pkg/app/server"
 	douyinapi "mydouyin/cmd/api/biz/handler/douyinapi"
+	"mydouyin/pkg/consts"
+
+	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
 /*
@@ -15,7 +17,7 @@ import (
 
 // Register register routes based on the IDL 'api.${HTTP Method}' annotation.
 func Register(r *server.Hertz) {
-	r.Static("/static", "/home/mao/Desktop/douyin")
+	r.Static("/static", consts.StaticRoot)
 	// r.StaticFS("/video", &app.FS{Root: "./", GenerateIndexPages: true})
 	// r.StaticFile("/staticFile","/home/mao/Desktop/douyin/staticFile")
 	root := r.Group("/", rootMw()...)
@@ -34,6 +36,15 @@ func Register(r *server.Hertz) {
 			{
 				_action := _publish.Group("/action")
 				_action.POST("/", douyinapi.PublishVideo)
+			}
+			_favorite := _douyin.Group("/favorite", _favoriteMw()...)
+			{
+				_action := _favorite.Group("/action")
+				_action.POST("/", douyinapi.FavoriteAction)
+			}
+			{
+				_list := _favorite.Group("/list")
+				_list.GET("/", douyinapi.GetFavoriteList)
 			}
 			_user := _douyin.Group("/user", _userMw()...)
 			_user.GET("/", append(_getuserMw(), douyinapi.GetUser)...)
