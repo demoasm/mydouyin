@@ -116,6 +116,41 @@ func (res *GetPublishListResponse) SetErr(err error) {
 	res.StatusMsg = Err.ErrMsg
 }
 
+
+// @router /douyin/comment/action/ [POST]
+type CommentActionResponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	Comment    Comment `form:"comment" json:"comment" query:"comment"`
+}
+
+func (res *CommentActionResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *CommentActionResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+// @router /douyin/comment/list/ [GET]
+type CommentListResponse struct {
+	StatusCode  int64     `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg   string    `form:"status_msg" json:"status_msg" query:"status_msg"`
+	CommentList []Comment `form:"comment_list" json:"comment_list" query:"comment_list"`
+}
+
+func (res *CommentListResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *CommentListResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
 // @router /douyin/relation/action/ [POST]
 type RelationActionResponse struct {
 	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`

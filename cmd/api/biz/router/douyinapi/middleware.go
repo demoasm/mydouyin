@@ -90,6 +90,12 @@ func _publishMw() []app.HandlerFunc {
 	}
 }
 
+func _actionMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
+
 func _relationMw() []app.HandlerFunc {
 	return []app.HandlerFunc{
 		mw.JwtMiddleware.MiddlewareFunc(),
