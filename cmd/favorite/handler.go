@@ -46,3 +46,17 @@ func (s *FavoriteServiceImpl) GetList(ctx context.Context, req *douyinfavorite.G
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
 	return resp, nil
 }
+
+// GetIsFavorite implements the FavoriteServiceImpl interface.
+func (s *FavoriteServiceImpl) GetIsFavorite(ctx context.Context, req *douyinfavorite.GetIsFavoriteRequest) (resp *douyinfavorite.GetIsFavoriteResponse, err error) {
+	resp = new(douyinfavorite.GetIsFavoriteResponse)
+	var isfavorites []bool
+	isfavorites, err = service.NewGetIsFavoriteService(ctx).GetIsFavorite(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.IsFavorites = isfavorites
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
+}
