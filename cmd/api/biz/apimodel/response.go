@@ -116,7 +116,6 @@ func (res *GetPublishListResponse) SetErr(err error) {
 	res.StatusMsg = Err.ErrMsg
 }
 
-
 // @router /douyin/comment/action/ [POST]
 type CommentActionResponse struct {
 	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
@@ -194,7 +193,10 @@ func (res *FriendListReponse) Send(c *app.RequestContext) {
 }
 
 func (res *FriendListReponse) SetErr(err error) {
-
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
 
 // @router /douyin/favorite/action/ [POST]
 type FavoriteActionResponse struct {
