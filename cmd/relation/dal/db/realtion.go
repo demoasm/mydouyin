@@ -3,12 +3,15 @@ package db
 import (
 	"context"
 	"mydouyin/pkg/consts"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 type Relation struct {
-	gorm.Model
+	ID         uint `gorm:"primarykey"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 	FollowId   int64 `json:"follow_id"`
 	FollowerId int64 `json:"follower_id"`
 }

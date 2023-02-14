@@ -43,3 +43,4 @@ type FollowAndFollowerListRequest struct {
 	UserId string `json:"user_id" query:"user_id"`
 	Token  string `json:"token" query:"token"`
 }
+
