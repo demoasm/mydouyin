@@ -79,6 +79,6 @@ func GetUser(ctx context.Context, req *douyinuser.MGetUserRequest) (*apimodel.Us
 	if len(resp.Users) < 1 {
 		return nil, errno.QueryErr
 	}
-
+	// resp.Users[0].IsFollow = true
 	return apimodel.PackUser(resp.Users[0]), nil
 }

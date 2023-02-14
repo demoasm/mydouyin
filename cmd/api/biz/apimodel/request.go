@@ -29,8 +29,19 @@ type PublishVideoRequest struct {
 }
 
 type GetPublishListRequest struct {
-	Token  string `json:"query" query:"token"`
+	Token  string `json:"token" query:"token"`
 	UserId string `json:"user_id" query:"user_id"`
+}
+
+type RelationActionRequest struct {
+	Token      string `json:"token" query:"token"`
+	ToUserId   string `json:"to_user_id" query:"to_user_id"`
+	ActionType string `json:"action_type" query:"action_type"`
+}
+
+type FollowAndFollowerListRequest struct {
+	UserId string `json:"user_id" query:"user_id"`
+	Token  string `json:"token" query:"token"`
 }
 
 type FavoriteActionRequest struct {
