@@ -68,3 +68,4 @@ func (s *UserServiceImpl) MGetUser(ctx context.Context, req *douyinuser.MGetUser
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
 	return
 }
+

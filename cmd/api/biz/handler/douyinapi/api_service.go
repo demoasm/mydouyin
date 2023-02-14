@@ -23,7 +23,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-//  基础接口
+//	基础接口
+//
 // FavoriteAction
 // @router /douyin/favorite/action/ [POST]
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
@@ -67,7 +68,6 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/favorite/list/ [GET]
 func GetFavoriteList(ctx context.Context, c *app.RequestContext) {
 
-	
 	user, exists := c.Get(consts.IdentityKey)
 	if !exists {
 		SendResponse(c, errno.AuthorizationFailedErr, nil)
@@ -101,6 +101,11 @@ func GetFavoriteList(ctx context.Context, c *app.RequestContext) {
 // GetFeed
 // @router /douyin/feed/ [GET]
 func GetFeed(ctx context.Context, c *app.RequestContext) {
+	user, exists := c.Get(consts.IdentityKey)
+	var userId int64 = -1
+	if exists {
+		userId = user.(*apimodel.User).UserID
+	}
 	var err error
 	var req apimodel.GetFeedRequest
 	err = c.BindAndValidate(&req)
@@ -119,7 +124,7 @@ func GetFeed(ctx context.Context, c *app.RequestContext) {
 
 	resp.VideoList, resp.NextTime, err = rpc.GetFeed(context.Background(), &douyinvideo.GetFeedRequest{
 		LatestTime: req.LatestTime,
-		UserId:     -1,
+		UserId:     userId,
 	})
 
 	if err != nil {
@@ -139,7 +144,6 @@ func GetPublishList(ctx context.Context, c *app.RequestContext) {
 
 	var err error
 	var req apimodel.GetPublishListRequest
-
 
 	err = c.BindAndValidate(&req)
 	if err != nil {

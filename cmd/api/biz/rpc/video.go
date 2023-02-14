@@ -2,7 +2,9 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/kitex_gen/douyinvideo/videoservice"
@@ -66,14 +68,28 @@ func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimo
 		return nil, -1, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
 	}
 	feed = make([]apimodel.Video, 0, 30)
+	favorites := make([]*douyinfavorite.Favorite, 0)
 	for _, rpc_video := range resp.VideoList {
-		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{rpc_video.Author}})
+		favorite := new(douyinfavorite.Favorite)
+		favorite.UserId = req.UserId
+		favorite.VideoId = rpc_video.VideoId
+		favorites = append(favorites, favorite)
+	}
+	fmt.Print("test",favorites)
+	isFavorites, err := favoriteClient.GetIsFavorite(ctx, &douyinfavorite.GetIsFavoriteRequest{FavoriteList: favorites})
+
+
+	for i:=0; i<len(resp.VideoList); i++{
+		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{resp.VideoList[i].Author}})
 		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
 			continue
 		}
 		author := apimodel.PackUser(r.Users[0])
-		video := apimodel.PackVideo(rpc_video)
+		video := apimodel.PackVideo(resp.VideoList[i])
 		video.Author = *author
+		if isFavorites.IsFavorites[i]{
+			video.IsFavorite = true
+		}
 		feed = append(feed, *video)
 	}
 	next_time = resp.NextTime

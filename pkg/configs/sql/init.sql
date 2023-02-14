@@ -42,8 +42,8 @@ CREATE TABLE `comment`
     `date` varchar(5) NOT NULL DEFAULT '01-01' COMMENT 'comment create date',
     PRIMARY KEY (`id`),
     KEY          `idx_video_id` (`video`) COMMENT 'Video id index',
-    CONSTRAINT   `video_id` FOREIGN KEY (`video`) REFERENCES `video` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT   `user_id` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT   `video_id1` FOREIGN KEY (`video`) REFERENCES `video` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT   `user_id1` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Comment information table';
 
 CREATE TABLE `relation`
@@ -55,8 +55,8 @@ CREATE TABLE `relation`
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'vidoe update time',
     `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'video delete time',
     PRIMARY KEY (`id`),
-    UNIQUE KEY   (`follow_id`, `follower_id`) COMMENT 'Author id index',
-    KEY          (`follower_id`) COMMENT 'Author id index',
+    KEY   `idx_follow_id_follower_id` (`follow_id`, `follower_id`) COMMENT 'follow id and follower id index',
+    KEY          (`follower_id`) COMMENT 'follower id index',
     CONSTRAINT   `follow` FOREIGN KEY (`follow_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT   `follower` FOREIGN KEY (`follower_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='User relation table';
