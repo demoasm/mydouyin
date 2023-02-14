@@ -5,11 +5,14 @@ package douyinapi
 import (
 	"context"
 	"strconv"
+	"strings"
+	"time"
 
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/mw"
 	"mydouyin/cmd/api/biz/rpc"
 	videohandel "mydouyin/cmd/api/biz/videoHandel"
+	"mydouyin/kitex_gen/douyincomment"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
@@ -18,7 +21,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-//基础接口
+// 基础接口
 // GetFeed
 // @router /douyin/feed/ [GET]
 func GetFeed(ctx context.Context, c *app.RequestContext) {
@@ -182,5 +185,112 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp.User = *user
+	err = errno.Success
+}
+
+// CommentAction .
+// @router /douyin/comment/action [POST]
+func CommentAction(ctx context.Context, c *app.RequestContext) {
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	var err error
+	var req apimodel.CommentActionRequest
+	err = c.BindAndValidate((&req))
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.CommentActionResponse)
+
+	// get the content
+	actionType, err := strconv.Atoi(req.ActionType)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	if actionType == 1 {
+		// create the date
+		getMonth := time.Now().Format("01")
+		getDay := time.Now().Format("02")
+		var build strings.Builder
+		build.WriteString(getMonth)
+		build.WriteString("-")
+		build.WriteString(getDay)
+		date := build.String()
+		// create the VideoID
+		videoID, err := strconv.ParseInt(req.VideoId, 10, 64)
+		if err != nil {
+			SendResponse(c, err, nil)
+			return
+		}
+		id, err := rpc.CreateComment(context.Background(), &douyincomment.CreateCommentRequest{
+			Video:      videoID,
+			User:       user.(*apimodel.User).UserID,
+			Content:    req.CommentText,
+			CreateDate: date,
+		})
+		if err != nil {
+			resp.SetErr(err)
+			resp.Send(c)
+		}
+		resp.Comment = apimodel.Comment{
+			CommentID:  id,
+			Commentor:  *user.(*apimodel.User),
+			Content:    req.CommentText,
+			CreateDate: date,
+		}
+	} else {
+		commentID, err := strconv.ParseInt(req.CommentId, 10, 64)
+		if err != nil {
+			SendResponse(c, err, nil)
+			return
+		}
+		err = rpc.DeleteComment(context.Background(), &douyincomment.DeleteCommentRequest{
+			CommentId: commentID,
+		})
+		if err != nil {
+			resp.SetErr(err)
+			resp.Send(c)
+		}
+	}
+
+	resp.SetErr(errno.Success)
+	resp.Send(c)
+
+}
+
+// @router /douyin/comment/list/ [GET]
+func CommentList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.CommentListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	// create the VideoID
+	videoID, err := strconv.ParseInt(req.VideoId, 10, 64)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.CommentListResponse)
+
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+
+	resp.CommentList, err = rpc.GetVideoComments(context.Background(), &douyincomment.GetVideoCommentsRequest{
+		Video: videoID,
+	})
+	if err != nil {
+		return
+	}
 	err = errno.Success
 }

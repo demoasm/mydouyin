@@ -1,6 +1,7 @@
 package apimodel
 
 import (
+	"mydouyin/kitex_gen/douyincomment"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
@@ -45,5 +46,21 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 		CommentCount:  int(douyin_video.CommentCount),
 		IsFavorite:    douyin_video.IsFavorite,
 		Title:         douyin_video.Title,
+	}
+}
+
+type Comment struct {
+	CommentID  int64  `form:"id" json:"id" query:"id"`
+	Commentor  User   `form:"user" json:"user" query:"user"`
+	Content    string `form:"content" json:"content" query:"content"`
+	CreateDate string `form:"create_data" json:"create_data" query:"create_data"`
+}
+
+func PackComment(douyin_comment *douyincomment.Comment) *Comment {
+	return &Comment{
+		CommentID: douyin_comment.CommentId,
+		// User: douyin_comment.User
+		Content:    douyin_comment.Content,
+		CreateDate: douyin_comment.CreateDate,
 	}
 }
