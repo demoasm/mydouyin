@@ -77,7 +77,7 @@ func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimo
 		feed = append(feed, *video)
 	}
 	next_time = resp.NextTime
-	return
+	return feed, next_time, nil
 }
 
 //GetPublishList get video list by author
@@ -100,5 +100,5 @@ func GetPublishList(ctx context.Context, req *douyinvideo.GetListRequest) (video
 		video.Author = *author
 		video_list = append(video_list, *video)
 	}
-	return
+	return video_list, nil
 }

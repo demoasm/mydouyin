@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"mydouyin/cmd/video/dal/db"
-	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/cmd/video/pack"
+	"mydouyin/kitex_gen/douyinvideo"
 )
 
 type GetListService struct {
