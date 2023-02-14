@@ -257,7 +257,7 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		err = errno.ParamErr
 		return
 	}
-	user, err1 := rpc.GetUser(context.Background(), &douyinuser.MGetUserRequest{[]int64{int64(id)}})
+	user, err1 := rpc.GetUser(context.Background(), &douyinuser.MGetUserRequest{UserIds: []int64{int64(id)}})
 	if err1 != nil {
 		err = err1
 		return
@@ -441,7 +441,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		err = errno.ParamErr
 		return
 	}
-	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{int64(id)})
+	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{FollowerId: int64(id)})
 	if err1 != nil {
 		err = err1
 		return
@@ -469,7 +469,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		err = errno.ParamErr
 		return
 	}
-	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
 	if err1 != nil {
 		err = err1
 		return
