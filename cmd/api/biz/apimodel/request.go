@@ -44,3 +44,26 @@ type FollowAndFollowerListRequest struct {
 	Token  string `json:"token" query:"token"`
 }
 
+type FavoriteActionRequest struct {
+	Token      string `json:"query" query:"token"`
+	VideoID    string `json:"video_id" query:"video_id"`
+	ActionType string `json:"action_type" query:"action_type"`
+}
+
+type GetFavoriteListRequest struct {
+	Token  string `json:"query" query:"token"`
+	UserId string `json:"user_id" query:"user_id"`
+}
+
+type CommentActionRequest struct {
+	Token       string `json:"token" query:"token"`
+	VideoId     string `json:"video_id" query:"video_id"`
+	ActionType  string `json:"action_type" query:"action_type"`
+	CommentText string `json:"comment_text" query:"comment_text"`
+	CommentId   string `json:"comment_id" query:"comment_id"`
+}
+
+type CommentListRequest struct {
+	Token   string `json:"token" query:"token"`
+	VideoId string `json:"video_id" query:"video_id"`
+}

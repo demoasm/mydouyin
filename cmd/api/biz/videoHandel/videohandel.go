@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"mydouyin/pkg/consts"
 	"os"
 	"time"
 
@@ -20,7 +21,8 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/home/mao/Desktop/douyin/static/"
+	VH.Root = "/mnt/d/Documents/demos/mydouyin/static/"
+	VH.Root = consts.StaticRoot + "static/"
 	VH.RelativePath = "static/"
 }
 

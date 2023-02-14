@@ -78,7 +78,7 @@ func GetFollowerList(ctx context.Context, req *relation.GetFollowerListRequest) 
 		return []*apimodel.User{}, nil
 	}
 	ur, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{
-		resp.FollowerIds,
+		UserIds: resp.FollowerIds,
 	})
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func GetFollowList(ctx context.Context, req *relation.GetFollowListRequest) ([]*
 		return []*apimodel.User{}, nil
 	}
 	ur, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{
-		resp.FollowIds,
+		UserIds: resp.FollowIds,
 	})
 	if err != nil {
 		return nil, err

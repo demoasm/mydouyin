@@ -78,7 +78,19 @@ func _createuserMw() []app.HandlerFunc {
 	return nil
 }
 
+func _favoriteMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
+
 func _publishMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
+
+func _actionMw() []app.HandlerFunc {
 	return []app.HandlerFunc{
 		mw.JwtMiddleware.MiddlewareFunc(),
 	}

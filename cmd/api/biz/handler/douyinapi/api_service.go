@@ -5,11 +5,15 @@ package douyinapi
 import (
 	"context"
 	"strconv"
+	"strings"
+	"time"
 
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/mw"
 	"mydouyin/cmd/api/biz/rpc"
 	videohandel "mydouyin/cmd/api/biz/videoHandel"
+	"mydouyin/kitex_gen/douyincomment"
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/kitex_gen/relation"
@@ -19,7 +23,80 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
-//基础接口
+//  基础接口
+// FavoriteAction
+// @router /douyin/favorite/action/ [POST]
+func FavoriteAction(ctx context.Context, c *app.RequestContext) {
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	var err error
+	var req apimodel.FavoriteActionRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		// c.String(consts.StatusBadRequest, err.Error())
+		SendResponse(c, err, nil)
+		return
+	}
+	videoId, err := strconv.Atoi(req.VideoID)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.FavoriteActionResponse)
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	err = rpc.FavoriteAction(context.Background(), &douyinfavorite.FavoriteActionRequest{
+		UserId:     user.(*apimodel.User).UserID,
+		VideoId:    int64(videoId),
+		ActionType: req.ActionType,
+	})
+	if err != nil {
+		return
+	}
+	err = errno.Success
+
+}
+
+// GetFavoriteList
+// @router /douyin/favorite/list/ [GET]
+func GetFavoriteList(ctx context.Context, c *app.RequestContext) {
+
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+
+	var err error
+	var req apimodel.GetFavoriteListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		// c.String(consts.StatusBadRequest, err.Error())
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.GetFavoriteListResponse)
+
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	resp.VideoList, err = rpc.GetFavoriteList(context.Background(), &douyinfavorite.GetListRequest{
+		UserId: user.(*apimodel.User).UserID,
+	})
+	if err != nil {
+		return
+	}
+	err = errno.Success
+}
+
 // GetFeed
 // @router /douyin/feed/ [GET]
 func GetFeed(ctx context.Context, c *app.RequestContext) {
@@ -53,17 +130,18 @@ func GetFeed(ctx context.Context, c *app.RequestContext) {
 // GetPublishList
 // @router /douyin/publish/list [GET]
 func GetPublishList(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req apimodel.GetPublishListRequest
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		// c.String(consts.StatusBadRequest, err.Error())
-		SendResponse(c, err, nil)
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
 		return
 	}
 
-	userId, err := strconv.Atoi(req.UserId)
+	var err error
+	var req apimodel.GetPublishListRequest
+
+	err = c.BindAndValidate(&req)
 	if err != nil {
+		// c.String(consts.StatusBadRequest, err.Error())
 		SendResponse(c, err, nil)
 		return
 	}
@@ -76,7 +154,7 @@ func GetPublishList(ctx context.Context, c *app.RequestContext) {
 	}()
 
 	resp.VideoList, err = rpc.GetPublishList(context.Background(), &douyinvideo.GetListRequest{
-		UserId: int64(userId),
+		UserId: user.(*apimodel.User).UserID,
 	})
 	if err != nil {
 		return
@@ -177,12 +255,119 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		err = errno.ParamErr
 		return
 	}
-	user, err1 := rpc.GetUser(context.Background(), &douyinuser.MGetUserRequest{[]int64{int64(id)}})
+	user, err1 := rpc.GetUser(context.Background(), &douyinuser.MGetUserRequest{UserIds: []int64{int64(id)}})
 	if err1 != nil {
 		err = err1
 		return
 	}
 	resp.User = *user
+	err = errno.Success
+}
+
+// CommentAction .
+// @router /douyin/comment/action [POST]
+func CommentAction(ctx context.Context, c *app.RequestContext) {
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	var err error
+	var req apimodel.CommentActionRequest
+	err = c.BindAndValidate((&req))
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.CommentActionResponse)
+
+	// get the content
+	actionType, err := strconv.Atoi(req.ActionType)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	if actionType == 1 {
+		// create the date
+		getMonth := time.Now().Format("01")
+		getDay := time.Now().Format("02")
+		var build strings.Builder
+		build.WriteString(getMonth)
+		build.WriteString("-")
+		build.WriteString(getDay)
+		date := build.String()
+		// create the VideoID
+		videoID, err := strconv.ParseInt(req.VideoId, 10, 64)
+		if err != nil {
+			SendResponse(c, err, nil)
+			return
+		}
+		id, err := rpc.CreateComment(context.Background(), &douyincomment.CreateCommentRequest{
+			Video:      videoID,
+			User:       user.(*apimodel.User).UserID,
+			Content:    req.CommentText,
+			CreateDate: date,
+		})
+		if err != nil {
+			resp.SetErr(err)
+			resp.Send(c)
+		}
+		resp.Comment = apimodel.Comment{
+			CommentID:  id,
+			Commentor:  *user.(*apimodel.User),
+			Content:    req.CommentText,
+			CreateDate: date,
+		}
+	} else {
+		commentID, err := strconv.ParseInt(req.CommentId, 10, 64)
+		if err != nil {
+			SendResponse(c, err, nil)
+			return
+		}
+		err = rpc.DeleteComment(context.Background(), &douyincomment.DeleteCommentRequest{
+			CommentId: commentID,
+		})
+		if err != nil {
+			resp.SetErr(err)
+			resp.Send(c)
+		}
+	}
+
+	resp.SetErr(errno.Success)
+	resp.Send(c)
+
+}
+
+// @router /douyin/comment/list/ [GET]
+func CommentList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.CommentListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	// create the VideoID
+	videoID, err := strconv.ParseInt(req.VideoId, 10, 64)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp := new(apimodel.CommentListResponse)
+
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+
+	resp.CommentList, err = rpc.GetVideoComments(context.Background(), &douyincomment.GetVideoCommentsRequest{
+		Video: videoID,
+	})
+	if err != nil {
+		return
+	}
 	err = errno.Success
 }
 
@@ -255,7 +440,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{int64(id)})
+	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{FollowerId: int64(id)})
 	if err1 != nil {
 		err = err1
 		return
@@ -284,7 +469,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
 	if err1 != nil {
 		err = err1
 		return

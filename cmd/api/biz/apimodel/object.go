@@ -1,6 +1,8 @@
 package apimodel
 
 import (
+	"mydouyin/kitex_gen/douyincomment"
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
@@ -67,5 +69,35 @@ func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
 		"url",
 		"123",
 		1,
+	}
+}
+
+type Comment struct {
+	CommentID  int64  `form:"id" json:"id" query:"id"`
+	Commentor  User   `form:"user" json:"user" query:"user"`
+	Content    string `form:"content" json:"content" query:"content"`
+	CreateDate string `form:"create_data" json:"create_data" query:"create_data"`
+}
+
+func PackComment(douyin_comment *douyincomment.Comment) *Comment {
+	return &Comment{
+		CommentID: douyin_comment.CommentId,
+		// User: douyin_comment.User
+		Content:    douyin_comment.Content,
+		CreateDate: douyin_comment.CreateDate,
+	}
+}
+
+type Favorite struct {
+	FavoriteID int64 `form:"id" json:"id" query:"id"`
+	UserID     int64 `form:"user_id" json:"user_id" query:"user_id"`
+	VideoID    int64 `form:"video_id" json:"video_id" query:"video_id"`
+}
+
+func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
+	return &Favorite{
+		FavoriteID: douyin_favorite.FavoriteId,
+		UserID:     douyin_favorite.UserId,
+		VideoID:    douyin_favorite.VideoId,
 	}
 }
