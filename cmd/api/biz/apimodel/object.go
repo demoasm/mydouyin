@@ -1,6 +1,7 @@
 package apimodel
 
 import (
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
@@ -45,5 +46,19 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 		CommentCount:  int(douyin_video.CommentCount),
 		IsFavorite:    douyin_video.IsFavorite,
 		Title:         douyin_video.Title,
+	}
+}
+
+type Favorite struct {
+	FavoriteID int64 `form:"id" json:"id" query:"id"`
+	UserID     int64 `form:"user_id" json:"user_id" query:"user_id"`
+	VideoID    int64 `form:"video_id" json:"video_id" query:"video_id"`
+}
+
+func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
+	return &Favorite{
+		FavoriteID: douyin_favorite.FavoriteId,
+		UserID:     douyin_favorite.UserId,
+		VideoID:    douyin_favorite.VideoId,
 	}
 }

@@ -32,3 +32,14 @@ type GetPublishListRequest struct {
 	Token  string `json:"query" query:"token"`
 	UserId string `json:"user_id" query:"user_id"`
 }
+
+type FavoriteActionRequest struct {
+	Token      string `json:"query" query:"token"`
+	VideoID    string `json:"video_id" query:"video_id"`
+	ActionType string `json:"action_type" query:"action_type"`
+}
+
+type GetFavoriteListRequest struct {
+	Token  string `json:"query" query:"token"`
+	UserId string `json:"user_id" query:"user_id"`
+}
