@@ -17,7 +17,7 @@ const (
 	TCP                 = "tcp"
 	UserServiceAddr     = ":9000"
 	VideoServiceAddr    = ":10000"
-	RelationServiceAddr = ":11000"
+	RelationServiceAddr = ":12000"
 	FavoriteServiceAddr = ":11000"
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:2379"
