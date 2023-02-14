@@ -89,7 +89,14 @@ func GetFollowerList(ctx context.Context, req *relation.GetFollowerListRequest) 
 	res := make([]*apimodel.User, 0, 30)
 	for _, rpc_user := range ur.Users {
 		user := apimodel.PackUser(rpc_user)
-		user.IsFollow = true
+		r, err := relationClient.ValidIfFollowRequest(ctx, &relation.ValidIfFollowRequest{
+			FollowId:   user.UserID,
+			FollowerId: req.FollowId,
+		})
+		if err != nil || r.BaseResp.StatusCode != 0 {
+			continue
+		}
+		user.IsFollow = r.IfFollow
 		res = append(res, user)
 	}
 	return res, nil
@@ -118,9 +125,38 @@ func GetFollowList(ctx context.Context, req *relation.GetFollowListRequest) ([]*
 	res := make([]*apimodel.User, 0, 30)
 	for _, rpc_user := range ur.Users {
 		user := apimodel.PackUser(rpc_user)
+		user.IsFollow = true
+		res = append(res, user)
+	}
+	return res, nil
+}
+
+func GetFriendList(ctx context.Context, req *relation.GetFollowerListRequest) ([]*apimodel.FriendUser, error) {
+	resp, err := relationClient.GetFollower(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.BaseResp.StatusCode != 0 {
+		return nil, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+	}
+	if len(resp.FollowerIds) < 1 {
+		return []*apimodel.FriendUser{}, nil
+	}
+	ur, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{
+		resp.FollowerIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if ur.BaseResp.StatusCode != 0 {
+		return nil, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
+	}
+	res := make([]*apimodel.FriendUser, 0, 30)
+	for _, rpc_user := range ur.Users {
+		user := apimodel.PackFriendUser(rpc_user)
 		r, err := relationClient.ValidIfFollowRequest(ctx, &relation.ValidIfFollowRequest{
-			FollowId:   req.FollowerId,
-			FollowerId: user.UserID,
+			FollowId:   user.UserID,
+			FollowerId: req.FollowId,
 		})
 		if err != nil || r.BaseResp.StatusCode != 0 {
 			continue

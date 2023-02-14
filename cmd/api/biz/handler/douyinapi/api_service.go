@@ -244,16 +244,17 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, err, nil)
 		return
 	}
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	id := user.(*apimodel.User).UserID
 	resp := new(apimodel.FollowAndFollowerListReponse)
 	defer func() {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	id, err := strconv.Atoi(req.UserId)
-	if err != nil {
-		err = errno.ParamErr
-		return
-	}
 	users, err1 := rpc.GetFollowList(context.Background(), &relation.GetFollowListRequest{int64(id)})
 	if err1 != nil {
 		err = err1
@@ -272,17 +273,47 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, err, nil)
 		return
 	}
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	id := user.(*apimodel.User).UserID
 	resp := new(apimodel.FollowAndFollowerListReponse)
 	defer func() {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	id, err := strconv.Atoi(req.UserId)
-	if err != nil {
-		err = errno.ParamErr
+	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	if err1 != nil {
+		err = err1
 		return
 	}
-	users, err1 := rpc.GetFollowerList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	resp.UserList = users
+	err = errno.Success
+}
+
+// @router /douyin/relation/friend/list/ [GET]
+func FriendList(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.FollowAndFollowerListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	id := user.(*apimodel.User).UserID
+	resp := new(apimodel.FriendListReponse)
+	defer func() {
+		resp.SetErr(err)
+		resp.Send(c)
+	}()
+	users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
 	if err1 != nil {
 		err = err1
 		return

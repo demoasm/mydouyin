@@ -55,6 +55,8 @@ func Register(r *server.Hertz) {
 				_follow.GET("/list/", douyinapi.FollowList)
 				_follower := _relation.Group("/follower")
 				_follower.GET("/list/", douyinapi.FollowerList)
+				_friend := _relation.Group("/friend")
+				_friend.GET("/list/",douyinapi.FriendList)
 			}
 		}
 	}
