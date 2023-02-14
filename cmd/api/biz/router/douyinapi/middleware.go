@@ -83,3 +83,9 @@ func _publishMw() []app.HandlerFunc {
 		mw.JwtMiddleware.MiddlewareFunc(),
 	}
 }
+
+func _actionMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
