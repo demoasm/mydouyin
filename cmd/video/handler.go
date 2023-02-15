@@ -1,10 +1,10 @@
 package main
 
 import (
+	douyinvideo "mydouyin/kitex_gen/douyinvideo"
 	"context"
 	"mydouyin/cmd/video/pack"
 	"mydouyin/cmd/video/service"
-	douyinvideo "mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/errno"
 )
 
@@ -19,12 +19,14 @@ func (s *VideoServiceImpl) CreateVideo(ctx context.Context, req *douyinvideo.Cre
 		resp.BaseResp = pack.BuildBaseResp(errno.ParamErr)
 		return resp, nil
 	}
-	err = service.NewCreateVideoService(ctx).CreateVideo(req)
+	var idList []int64
+	idList, err = service.NewCreateVideoService(ctx).CreateVideo(req)
 	if err != nil {
 		resp.BaseResp = pack.BuildBaseResp(err)
 		return resp, nil
 	}
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	resp.VideoIds = idList
 	return resp, nil
 }
 
@@ -70,4 +72,10 @@ func (s *VideoServiceImpl) MGetVideoUser(ctx context.Context, req *douyinvideo.M
 	resp.Videos = videos
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
 	return resp, nil
+}
+
+// DeleteVideo implements the VideoServiceImpl interface.
+func (s *VideoServiceImpl) DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest) (resp *douyinvideo.DeleteVideoResponse, err error) {
+	// TODO: Your code here...
+	return
 }

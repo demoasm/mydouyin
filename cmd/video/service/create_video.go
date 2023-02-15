@@ -16,7 +16,7 @@ func NewCreateVideoService(ctx context.Context) *CreateVideoService {
 }
 
 // CreateVideo create video info.
-func (s *CreateVideoService) CreateVideo(req *douyinvideo.CreateVideoRequest) error {
+func (s *CreateVideoService) CreateVideo(req *douyinvideo.CreateVideoRequest) ([]int64,error) {
 	return db.CreateVideo(s.ctx, []*db.Video{{
 		Author: req.Author,
 		PlayUrl: req.PlayUrl,

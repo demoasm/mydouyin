@@ -22,8 +22,13 @@ func (v *Video) TableName() string {
 }
 
 // CreateVideo create video info
-func CreateVideo(ctx context.Context, videos []*Video) error {
-	return DB.WithContext(ctx).Create(videos).Error
+func CreateVideo(ctx context.Context, videos []*Video) ([]int64, error) {
+	err := DB.WithContext(ctx).Create(videos).Error
+	idList := make([]int64, 0)
+	for _, i := range videos {
+		idList = append(idList, int64(i.ID))
+	}
+	return idList, err
 }
 
 // MGetVideos multiple get list of video info
@@ -54,4 +59,12 @@ func MGetVideosbyAuthor(ctx context.Context, authorID int64) ([]*Video, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+// Delete the video
+func DeleteVideo(ctx context.Context, video_id int64) error {
+	if err := DB.WithContext(ctx).Delete(&Video{}, video_id).Error; err != nil {
+		return nil
+	}
+	return nil
 }

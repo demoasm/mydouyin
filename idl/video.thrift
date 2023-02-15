@@ -36,6 +36,7 @@ struct CreateVideoRequest {
 
 struct CreateVideoResponse {
     1: BaseResp base_resp
+    2: list<i64> video_ids
 }
 
 struct GetListRequest {
@@ -56,9 +57,18 @@ struct MGetVideoResponse {
     2: BaseResp base_resp
 }
 
+struct DeleteVideoRequest {
+    1: i64 video_id
+}
+
+struct DeleteVideoResponse {
+    1: BaseResp base_resp
+}
+
 service VideoService {
     CreateVideoResponse CreateVideo(1: CreateVideoRequest req)
     GetFeedResponse GetFeed(1: GetFeedRequest req)
     GetListResponse GetList(1: GetListRequest req)
     MGetVideoResponse MGetVideoUser(1: MGetVideoRequest req)
+    DeleteVideoResponse DeleteVideo(1: DeleteVideoRequest req)
 }

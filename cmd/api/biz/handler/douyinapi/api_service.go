@@ -4,6 +4,7 @@ package douyinapi
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -122,6 +123,15 @@ func PublishVideo(ctx context.Context, c *app.RequestContext) {
 		resp.Send(c)
 	}
 
+	// 接受并发错误
+	err = <-videohandel.VH.Signal
+	if err != nil {
+		// TODO:理论上不会出现err(划掉)
+		// 真的会有ERROR😅😅😅
+		fmt.Println(err)
+		resp.SetErr(err)
+		resp.Send(c)
+	}
 	resp.SetErr(errno.Success)
 	resp.Send(c)
 }
