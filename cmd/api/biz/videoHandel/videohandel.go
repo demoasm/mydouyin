@@ -26,7 +26,8 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/mnt/d/Documents/demos/mydouyin/static/"
+	VH.Root = "/home/mydouyin/static/"
+	VH.Root = consts.StaticRoot + "static/"
 	VH.RelativePath = "static/"
 	VH.Signal = make(chan error)
 
@@ -63,10 +64,30 @@ func (vh *VideoHandel) UpLoad(file *multipart.FileHeader, videoObject string, pi
 		vh.Signal <- err
 		return
 	}
-	// 截图格式
-	style := "video/snapshot,t_0,f_jpg,w_800,h_600"
-	// 根据视频名直接获取截图url
-	signedURL, err := vh.bucket.SignURL(videoObject, oss.HTTPGet, 600, oss.Process(style))
+	defer newfile.Close()
+
+	var context []byte = make([]byte, 1024)
+	for {
+		n, err := filepoint.Read(context)
+		newfile.Write(context[:n])
+		if err != nil {
+			if err == io.EOF {
+				break
+			} else {
+				return "", "", err
+			}
+		}
+	}
+
+	//截取封面
+	cover_name := time.Now().Format("2006-01-02 15:04:05") + ".jpg"
+	// cmd := exec.Command("ffmpeg", "-i", vh.Root+"video/"+name, "-vf", "select=eq(n,100)", "-vframes", "1", snapshotPath)
+	buf := bytes.NewBuffer(nil)
+	err = ffmpeg.Input(vh.Root+"video/"+name).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(buf).
+		Run()
 	if err != nil {
 		vh.Signal <- err
 		return

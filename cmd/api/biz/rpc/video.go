@@ -3,12 +3,14 @@ package rpc
 import (
 	"context"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/kitex_gen/douyinvideo/videoservice"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 	"mydouyin/pkg/mw"
+	"time"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -60,24 +62,42 @@ func PublishVideo(ctx context.Context, req *douyinvideo.CreateVideoRequest) erro
 func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimodel.Video, next_time int64, err error) {
 	resp, err := videoClient.GetFeed(ctx, req)
 	if err != nil {
-		return nil, -1, err
+		return nil, time.Now().Unix(), err
 	}
 	if resp.BaseResp.StatusCode != 0 {
-		return nil, -1, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+		return nil, time.Now().Unix(), errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
 	}
 	feed = make([]apimodel.Video, 0, 30)
+	favorites := make([]*douyinfavorite.Favorite, 0)
 	for _, rpc_video := range resp.VideoList {
-		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{rpc_video.Author}})
+		favorite := new(douyinfavorite.Favorite)
+		favorite.UserId = req.UserId
+		favorite.VideoId = rpc_video.VideoId
+		favorites = append(favorites, favorite)
+	}
+	isFavorites, err := favoriteClient.GetIsFavorite(ctx, &douyinfavorite.GetIsFavoriteRequest{FavoriteList: favorites})
+
+	if err != nil {
+		return nil, time.Now().Unix(), err
+	}
+
+	if len(resp.VideoList) != len(isFavorites.IsFavorites) {
+		return nil, time.Now().Unix(), errno.ServiceErr
+	}
+
+	for i := 0; i < len(resp.VideoList); i++ {
+		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{resp.VideoList[i].Author}})
 		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
 			continue
 		}
 		author := apimodel.PackUser(r.Users[0])
-		video := apimodel.PackVideo(rpc_video)
+		video := apimodel.PackVideo(resp.VideoList[i])
 		video.Author = *author
+		video.IsFavorite = isFavorites.IsFavorites[i]
 		feed = append(feed, *video)
 	}
 	next_time = resp.NextTime
-	return
+	return feed, next_time, nil
 }
 
 //GetPublishList get video list by author
@@ -100,5 +120,5 @@ func GetPublishList(ctx context.Context, req *douyinvideo.GetListRequest) (video
 		video.Author = *author
 		video_list = append(video_list, *video)
 	}
-	return
+	return video_list, nil
 }
