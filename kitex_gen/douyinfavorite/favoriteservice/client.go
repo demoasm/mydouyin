@@ -13,6 +13,7 @@ import (
 type Client interface {
 	FavoriteAction(ctx context.Context, req *douyinfavorite.FavoriteActionRequest, callOptions ...callopt.Option) (r *douyinfavorite.FavoriteActionResponse, err error)
 	GetList(ctx context.Context, req *douyinfavorite.GetListRequest, callOptions ...callopt.Option) (r *douyinfavorite.GetListResponse, err error)
+	GetIsFavorite(ctx context.Context, req *douyinfavorite.GetIsFavoriteRequest, callOptions ...callopt.Option) (r *douyinfavorite.GetIsFavoriteResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -52,4 +53,9 @@ func (p *kFavoriteServiceClient) FavoriteAction(ctx context.Context, req *douyin
 func (p *kFavoriteServiceClient) GetList(ctx context.Context, req *douyinfavorite.GetListRequest, callOptions ...callopt.Option) (r *douyinfavorite.GetListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetList(ctx, req)
+}
+
+func (p *kFavoriteServiceClient) GetIsFavorite(ctx context.Context, req *douyinfavorite.GetIsFavoriteRequest, callOptions ...callopt.Option) (r *douyinfavorite.GetIsFavoriteResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetIsFavorite(ctx, req)
 }

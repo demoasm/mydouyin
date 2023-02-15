@@ -30,9 +30,19 @@ struct GetListResponse {
     2: list<i64> video_ids
 }
 
+struct GetIsFavoriteRequest{
+    1: list<Favorite> favorite_list
+}
+
+struct GetIsFavoriteResponse {
+    1: list<bool> is_favorites
+    2: BaseResp base_resp
+}
+
 service FavoriteService {
     FavoriteActionResponse FavoriteAction(1: FavoriteActionRequest req)
     GetListResponse GetList(1: GetListRequest req)
+    GetIsFavoriteResponse GetIsFavorite(1: GetIsFavoriteRequest req)
 }
 
 

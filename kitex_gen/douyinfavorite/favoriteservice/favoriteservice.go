@@ -21,6 +21,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	methods := map[string]kitex.MethodInfo{
 		"FavoriteAction": kitex.NewMethodInfo(favoriteActionHandler, newFavoriteServiceFavoriteActionArgs, newFavoriteServiceFavoriteActionResult, false),
 		"GetList":        kitex.NewMethodInfo(getListHandler, newFavoriteServiceGetListArgs, newFavoriteServiceGetListResult, false),
+		"GetIsFavorite":  kitex.NewMethodInfo(getIsFavoriteHandler, newFavoriteServiceGetIsFavoriteArgs, newFavoriteServiceGetIsFavoriteResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "douyinfavorite",
@@ -72,6 +73,24 @@ func newFavoriteServiceGetListResult() interface{} {
 	return douyinfavorite.NewFavoriteServiceGetListResult()
 }
 
+func getIsFavoriteHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*douyinfavorite.FavoriteServiceGetIsFavoriteArgs)
+	realResult := result.(*douyinfavorite.FavoriteServiceGetIsFavoriteResult)
+	success, err := handler.(douyinfavorite.FavoriteService).GetIsFavorite(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newFavoriteServiceGetIsFavoriteArgs() interface{} {
+	return douyinfavorite.NewFavoriteServiceGetIsFavoriteArgs()
+}
+
+func newFavoriteServiceGetIsFavoriteResult() interface{} {
+	return douyinfavorite.NewFavoriteServiceGetIsFavoriteResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -97,6 +116,16 @@ func (p *kClient) GetList(ctx context.Context, req *douyinfavorite.GetListReques
 	_args.Req = req
 	var _result douyinfavorite.FavoriteServiceGetListResult
 	if err = p.c.Call(ctx, "GetList", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetIsFavorite(ctx context.Context, req *douyinfavorite.GetIsFavoriteRequest) (r *douyinfavorite.GetIsFavoriteResponse, err error) {
+	var _args douyinfavorite.FavoriteServiceGetIsFavoriteArgs
+	_args.Req = req
+	var _result douyinfavorite.FavoriteServiceGetIsFavoriteResult
+	if err = p.c.Call(ctx, "GetIsFavorite", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

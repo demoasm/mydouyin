@@ -6,17 +6,26 @@ import (
 )
 
 // Favorite pack video info
-func Favorite(f *db.Favorite) *douyinfavorite.Favorite {
+func Favorite(f *douyinfavorite.Favorite) *db.Favorite{
 	if f == nil {
 		return nil
 	}
-	return &douyinfavorite.Favorite{
-		FavoriteId: int64(f.ID),
+	return &db.Favorite{
 		UserId:  	int64(f.UserId),	
 		VideoId: 	int64(f.VideoId),
-
 	}
 }
+
+func Favorites(fs []*douyinfavorite.Favorite)  []*db.Favorite{
+	favorites := make([]*db.Favorite, 0)
+	for _, f := range fs {
+		if temp := Favorite(f); temp != nil {
+			favorites = append(favorites, temp)
+		}
+	}
+	return favorites
+}
+
 
 func FavoriteToVideoids(favorites []*db.Favorite) []int64 {
 	vids := make([]int64, 0)

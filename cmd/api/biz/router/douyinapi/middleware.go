@@ -43,6 +43,12 @@ func rootMw() []app.HandlerFunc {
 	}
 }
 
+func _feedMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MyMiddlewareFunc(),
+	}
+}
+
 func _douyinMw() []app.HandlerFunc {
 	// your code...
 	return nil
