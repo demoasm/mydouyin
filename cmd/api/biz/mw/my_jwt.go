@@ -495,6 +495,49 @@ func (mw *HertzJWTMiddleware) middlewareImpl(ctx context.Context, c *app.Request
 	c.Next(ctx)
 }
 
+func (mw *HertzJWTMiddleware) MyMiddlewareFunc() app.HandlerFunc {
+	return func(ctx context.Context, c *app.RequestContext) {
+		claims, err := mw.GetClaimsFromJWT(ctx, c)
+		defer c.Next(ctx)
+		if err != nil {
+			// mw.unauthorized(ctx, c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(err, ctx, c))
+			return
+		}
+
+		switch v := claims["exp"].(type) {
+		case nil:
+			// mw.unauthorized(ctx, c, http.StatusBadRequest, mw.HTTPStatusMessageFunc(ErrMissingExpField, ctx, c))
+			return
+		case float64:
+			if int64(v) < mw.TimeFunc().Unix() {
+				// mw.unauthorized(ctx, c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(ErrExpiredToken, ctx, c))
+				return
+			}
+		case json.Number:
+			n, err := v.Int64()
+			if err != nil {
+				// mw.unauthorized(ctx, c, http.StatusBadRequest, mw.HTTPStatusMessageFunc(ErrWrongFormatOfExp, ctx, c))
+				return
+			}
+			if n < mw.TimeFunc().Unix() {
+				// mw.unauthorized(ctx, c, http.StatusUnauthorized, mw.HTTPStatusMessageFunc(ErrExpiredToken, ctx, c))
+				return
+			}
+		default:
+			// mw.Unauthorized(ctx, c, http.StatusBadRequest, mw.HTTPStatusMessageFunc(ErrWrongFormatOfExp, ctx, c))
+		}
+
+		c.Set("JWT_PAYLOAD", claims)
+		identity := mw.IdentityHandler(ctx, c)
+
+		if identity != nil {
+			c.Set(mw.IdentityKey, identity)
+		}
+
+		c.Next(ctx)
+	}
+}
+
 // GetClaimsFromJWT get claims from JWT token
 func (mw *HertzJWTMiddleware) GetClaimsFromJWT(ctx context.Context, c *app.RequestContext) (MapClaims, error) {
 	token, err := mw.ParseToken(ctx, c)

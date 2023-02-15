@@ -4,4 +4,6 @@ func Init() {
 	initUser()
 	initVideo()
 	initComment()
+	initRelation()
+	initFavorite()
 }

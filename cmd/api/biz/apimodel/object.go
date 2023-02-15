@@ -2,12 +2,13 @@ package apimodel
 
 import (
 	"mydouyin/kitex_gen/douyincomment"
+	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 )
 
 type User struct {
-	UserID        int64  `form:"user_id" json:"user_id" query:"user_id"`
+	UserID        int64  `form:"user_id" json:"id" query:"user_id"`
 	Username      string `form:"name" json:"name" query:"name"`
 	FollowCount   int64  `form:"follow_count" json:"follow_count" query:"follow_count"`
 	FollowerCount int64  `form:"follower_count" json:"follower_count" query:"follower_count"`
@@ -48,6 +49,28 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 	}
 }
 
+type FriendUser struct {
+	User
+	Avatar  string `form:"avatar" json:"avatar" query:"avatar"`
+	Message string `form:"message" json:"message" query:"message"`
+	MsgType int64  `form:"msgType" json:"msgType" query:"msgType"`
+}
+
+func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
+	return &FriendUser{
+		User{
+			UserID:        douyin_user.UserId,
+			Username:      douyin_user.Username,
+			FollowCount:   douyin_user.FollowCount,
+			FollowerCount: douyin_user.FollowerCount,
+			IsFollow:      false,
+		},
+		"url",
+		"123",
+		1,
+	}
+}
+
 type Comment struct {
 	CommentID  int64  `form:"id" json:"id" query:"id"`
 	Commentor  User   `form:"user" json:"user" query:"user"`
@@ -61,5 +84,19 @@ func PackComment(douyin_comment *douyincomment.Comment) *Comment {
 		// User: douyin_comment.User
 		Content:    douyin_comment.Content,
 		CreateDate: douyin_comment.CreateDate,
+	}
+}
+
+type Favorite struct {
+	FavoriteID int64 `form:"id" json:"id" query:"id"`
+	UserID     int64 `form:"user_id" json:"user_id" query:"user_id"`
+	VideoID    int64 `form:"video_id" json:"video_id" query:"video_id"`
+}
+
+func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
+	return &Favorite{
+		FavoriteID: douyin_favorite.FavoriteId,
+		UserID:     douyin_favorite.UserId,
+		VideoID:    douyin_favorite.VideoId,
 	}
 }

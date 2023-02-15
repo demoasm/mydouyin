@@ -43,6 +43,12 @@ func rootMw() []app.HandlerFunc {
 	}
 }
 
+func _feedMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MyMiddlewareFunc(),
+	}
+}
+
 func _douyinMw() []app.HandlerFunc {
 	// your code...
 	return nil
@@ -78,6 +84,12 @@ func _createuserMw() []app.HandlerFunc {
 	return nil
 }
 
+func _favoriteMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
+
 func _publishMw() []app.HandlerFunc {
 	return []app.HandlerFunc{
 		mw.JwtMiddleware.MiddlewareFunc(),
@@ -85,6 +97,12 @@ func _publishMw() []app.HandlerFunc {
 }
 
 func _actionMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}
+
+func _relationMw() []app.HandlerFunc {
 	return []app.HandlerFunc{
 		mw.JwtMiddleware.MiddlewareFunc(),
 	}

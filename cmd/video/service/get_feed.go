@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"mydouyin/cmd/video/dal/db"
 	"mydouyin/cmd/video/pack"
 	"mydouyin/kitex_gen/douyinvideo"
@@ -22,6 +23,7 @@ func NewGetFeedService(ctx context.Context) *GetFeedService {
 
 // GetFeedService.
 func (s *GetFeedService) GetFeed(req *douyinvideo.GetFeedRequest) (int64, []*douyinvideo.Video, error) {
+	fmt.Printf("video")
 	latestTime, err := strconv.Atoi(req.LatestTime)
 	if err != nil {
 		return time.Now().Unix(), nil, err

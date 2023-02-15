@@ -149,3 +149,84 @@ func (res *CommentListResponse) SetErr(err error) {
 	res.StatusCode = Err.ErrCode
 	res.StatusMsg = Err.ErrMsg
 }
+
+// @router /douyin/relation/action/ [POST]
+type RelationActionResponse struct {
+	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
+}
+
+func (res *RelationActionResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *RelationActionResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+type FollowAndFollowerListReponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	UserList   []*User `form:"user_list" json:"user_list" query:"user_list"`
+}
+
+func (res *FollowAndFollowerListReponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *FollowAndFollowerListReponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+type FriendListReponse struct {
+	StatusCode int64         `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string        `form:"status_msg" json:"status_msg" query:"status_msg"`
+	UserList   []*FriendUser `form:"user_list" json:"user_list" query:"user_list"`
+}
+
+func (res *FriendListReponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *FriendListReponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+// @router /douyin/favorite/action/ [POST]
+type FavoriteActionResponse struct {
+	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
+}
+
+func (res *FavoriteActionResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *FavoriteActionResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+// @router /douyin/favorite/list/ [GET]
+type GetFavoriteListResponse struct {
+	StatusCode int64   `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string  `form:"status_msg" json:"status_msg" query:"status_msg"`
+	VideoList  []Video `form:"video_list" json:"video_list" query:"video_list"`
+}
+
+func (res *GetFavoriteListResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *GetFavoriteListResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
