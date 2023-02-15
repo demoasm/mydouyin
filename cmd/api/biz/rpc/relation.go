@@ -143,7 +143,7 @@ func GetFriendList(ctx context.Context, req *relation.GetFollowerListRequest) ([
 		return []*apimodel.FriendUser{}, nil
 	}
 	ur, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{
-		resp.FollowerIds,
+		UserIds: resp.FollowerIds,
 	})
 	if err != nil {
 		return nil, err
