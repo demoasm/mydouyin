@@ -67,8 +67,11 @@ func GetFavoriteList(ctx context.Context, req *douyinfavorite.GetListRequest) (v
 	}
 	video_list = make([]apimodel.Video, 0, 50)
 	videos, err := videoClient.MGetVideoUser(ctx, &douyinvideo.MGetVideoRequest{VideoIds: vids.VideoIds})
+	if err != nil {
+		return nil, err
+	}
 	if len(videos.Videos) < 1 {
-		return nil, nil
+		return make([]apimodel.Video, 0), nil
 	} else {
 		for _, rpc_video := range videos.Videos {
 			r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{rpc_video.Author}})

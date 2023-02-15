@@ -25,6 +25,6 @@ const (
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:2379"
 	DefaultLimit        = 10
-	CDNURL              = "http://http://192.168.167.94:8080/"
+	CDNURL              = "http://192.168.167.94:8080/"
 	StaticRoot          = "/home/mao/Desktop/douyin/"
 )

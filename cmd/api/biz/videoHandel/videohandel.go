@@ -59,6 +59,7 @@ func (vh *VideoHandel) UpLoadFile(file *multipart.FileHeader) (videourl, coverur
 	err = ffmpeg.Input(vh.Root+"video/"+name).
 		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(buf).
 		Run()
 	if err != nil {
 		return
