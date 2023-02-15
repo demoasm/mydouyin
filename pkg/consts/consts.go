@@ -25,10 +25,10 @@ const (
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:2379"
 	DefaultLimit        = 10
-	EndPoint           = "oss-cn-qingdao.aliyuncs.com"
-	AKID               = "LTAI5tA3AdzJpEjDcukRT4Ks"
-	AKS                = "aYjN0qjcpzTwAqUzngVB4HNWMLsrTl"
-	Bucket             = "jaxdy"
+	EndPoint            = "oss-cn-qingdao.aliyuncs.com"
+	AKID                = "LTAI5tA3AdzJpEjDcukRT4Ks"
+	AKS                 = "aYjN0qjcpzTwAqUzngVB4HNWMLsrTl"
+	Bucket              = "jaxdy"
 	CDNURL              = "http://192.168.251.93:8080/"
 	StaticRoot          = "/home/jszfree/mydouyin/"
 )
