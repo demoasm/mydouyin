@@ -21,7 +21,7 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/mnt/d/Documents/demos/mydouyin/static/"
+	VH.Root = "/home/mydouyin/static/"
 	VH.Root = consts.StaticRoot + "static/"
 	VH.RelativePath = "static/"
 }
