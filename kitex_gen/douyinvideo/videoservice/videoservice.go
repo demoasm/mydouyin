@@ -23,6 +23,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"GetFeed":       kitex.NewMethodInfo(getFeedHandler, newVideoServiceGetFeedArgs, newVideoServiceGetFeedResult, false),
 		"GetList":       kitex.NewMethodInfo(getListHandler, newVideoServiceGetListArgs, newVideoServiceGetListResult, false),
 		"MGetVideoUser": kitex.NewMethodInfo(mGetVideoUserHandler, newVideoServiceMGetVideoUserArgs, newVideoServiceMGetVideoUserResult, false),
+		"DeleteVideo":   kitex.NewMethodInfo(deleteVideoHandler, newVideoServiceDeleteVideoArgs, newVideoServiceDeleteVideoResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "douyinvideo",
@@ -110,6 +111,24 @@ func newVideoServiceMGetVideoUserResult() interface{} {
 	return douyinvideo.NewVideoServiceMGetVideoUserResult()
 }
 
+func deleteVideoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*douyinvideo.VideoServiceDeleteVideoArgs)
+	realResult := result.(*douyinvideo.VideoServiceDeleteVideoResult)
+	success, err := handler.(douyinvideo.VideoService).DeleteVideo(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newVideoServiceDeleteVideoArgs() interface{} {
+	return douyinvideo.NewVideoServiceDeleteVideoArgs()
+}
+
+func newVideoServiceDeleteVideoResult() interface{} {
+	return douyinvideo.NewVideoServiceDeleteVideoResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -155,6 +174,16 @@ func (p *kClient) MGetVideoUser(ctx context.Context, req *douyinvideo.MGetVideoR
 	_args.Req = req
 	var _result douyinvideo.VideoServiceMGetVideoUserResult
 	if err = p.c.Call(ctx, "MGetVideoUser", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest) (r *douyinvideo.DeleteVideoResponse, err error) {
+	var _args douyinvideo.VideoServiceDeleteVideoArgs
+	_args.Req = req
+	var _result douyinvideo.VideoServiceDeleteVideoResult
+	if err = p.c.Call(ctx, "DeleteVideo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
