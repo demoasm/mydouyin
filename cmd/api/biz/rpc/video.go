@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
@@ -11,6 +10,7 @@ import (
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 	"mydouyin/pkg/mw"
+	"time"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -62,10 +62,10 @@ func PublishVideo(ctx context.Context, req *douyinvideo.CreateVideoRequest) erro
 func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimodel.Video, next_time int64, err error) {
 	resp, err := videoClient.GetFeed(ctx, req)
 	if err != nil {
-		return nil, -1, err
+		return nil, time.Now().Unix(), err
 	}
 	if resp.BaseResp.StatusCode != 0 {
-		return nil, -1, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+		return nil, time.Now().Unix(), errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
 	}
 	feed = make([]apimodel.Video, 0, 30)
 	favorites := make([]*douyinfavorite.Favorite, 0)
@@ -75,11 +75,17 @@ func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimo
 		favorite.VideoId = rpc_video.VideoId
 		favorites = append(favorites, favorite)
 	}
-	fmt.Print("test",favorites)
 	isFavorites, err := favoriteClient.GetIsFavorite(ctx, &douyinfavorite.GetIsFavoriteRequest{FavoriteList: favorites})
 
+	if err != nil {
+		return nil, time.Now().Unix(), err
+	}
 
-	for i:=0; i<len(resp.VideoList); i++{
+	if len(resp.VideoList) != len(isFavorites.IsFavorites) {
+		return nil, time.Now().Unix(), errno.ServiceErr
+	}
+
+	for i := 0; i < len(resp.VideoList); i++ {
 		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{resp.VideoList[i].Author}})
 		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
 			continue
@@ -87,9 +93,7 @@ func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimo
 		author := apimodel.PackUser(r.Users[0])
 		video := apimodel.PackVideo(resp.VideoList[i])
 		video.Author = *author
-		if isFavorites.IsFavorites[i]{
-			video.IsFavorite = true
-		}
+		video.IsFavorite = isFavorites.IsFavorites[i]
 		feed = append(feed, *video)
 	}
 	next_time = resp.NextTime

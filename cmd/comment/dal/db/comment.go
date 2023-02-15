@@ -60,7 +60,7 @@ func DeleteComment(ctx context.Context, comment_id int64) error {
 func GetVideoComments(ctx context.Context, video_id int64) ([]*Comment, error) {
 	res := make([]*Comment, 0)
 	// it will search the context that didn't be deleted
-	if err := DB.WithContext(ctx).Where("video = ?", video_id).Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("video = ?", video_id).Order("id desc").Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

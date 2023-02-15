@@ -19,12 +19,12 @@ const (
 	TCP                 = "tcp"
 	UserServiceAddr     = ":9000"
 	VideoServiceAddr    = ":10000"
+	FavoriteServiceAddr = ":11000"
 	RelationServiceAddr = ":12000"
 	CommentServiceAddr  = ":13000"
-	FavoriteServiceAddr = ":11000"
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:2379"
 	DefaultLimit        = 10
-	CDNURL              = "http://192.168.167.94:8080/"
+	CDNURL              = "http://192.168.1.102:8080/"
 	StaticRoot          = "/home/mao/Desktop/douyin/"
 )
