@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"mydouyin/pkg/consts"
+	"mydouyin/pkg/errno"
 
 	"gorm.io/gorm"
 )
@@ -53,15 +54,23 @@ func CancleFavorite(ctx context.Context, favorites []*Favorite) error {
 	return nil
 }
 
-func QueryFavoriteById(ctx context.Context, userID int64, videoID int64) (bool, error) {
-	res := make([]*Favorite, 0)
-	if err := DB.WithContext(ctx).Where("user_id = ? and video_id = ?", userID, videoID).Find(&res).Error; err != nil {
-		return false, err
+func QueryFavoriteById(ctx context.Context, favorites []*Favorite) ([]bool, error) {
+	res := make([]bool, 0)
+	for _, favorite := range favorites{
+		find := make([]*Favorite, 0)
+		if err := DB.WithContext(ctx).Where("user_id = ? and video_id = ?", favorite.UserId, favorite.VideoId).Find(&find).Error; err != nil {
+			return res, err
+		}
+		if len(find) > 0{
+			res = append(res, true)
+		}else{
+			res = append(res, false)
+		}
 	}
-	if len(res) < 1 {
-		return false, nil
+	if len(res) != len(favorites){
+		return res, errno.NewErrNo(0000000, "something wrong")
 	}
-	return true, nil
+	return res, nil
 }
 
 func GetFavoriteList(ctx context.Context, userID int64) ([]*Favorite, error) {

@@ -1,11 +1,10 @@
 package main
-
 import (
 	"mydouyin/cmd/favorite/dal"
+	douyinvideo "mydouyin/kitex_gen/douyinfavorite/favoriteservice"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/mw"
 	"net"
-	douyinfavorite "mydouyin/kitex_gen/douyinfavorite/favoriteservice"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
@@ -16,6 +15,7 @@ import (
 	"github.com/kitex-contrib/obs-opentelemetry/tracing"
 	etcd "github.com/kitex-contrib/registry-etcd"
 )
+
 func Init() {
 	dal.Init()
 	//klog init
@@ -38,7 +38,7 @@ func main() {
 		provider.WithExportEndpoint(consts.ExportEndpoint),
 		provider.WithInsecure(),
 	)
-	svr := douyinfavorite.NewServer(new(FavoriteServiceImpl),
+	svr := douyinvideo.NewServer(new(FavoriteServiceImpl),
 		server.WithServiceAddr(addr),
 		server.WithRegistry(r),
 		//限流
