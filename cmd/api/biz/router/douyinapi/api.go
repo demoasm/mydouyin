@@ -17,7 +17,6 @@ import (
 
 // Register register routes based on the IDL 'api.${HTTP Method}' annotation.
 func Register(r *server.Hertz) {
-	r.Static("/static", "/mnt/d/Documents/demos/mydouyin")
 	r.Static("/static", consts.StaticRoot)
 	// r.StaticFS("/video", &app.FS{Root: "./", GenerateIndexPages: true})
 	// r.StaticFile("/staticFile","/home/mao/Desktop/douyin/staticFile")
