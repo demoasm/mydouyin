@@ -46,7 +46,7 @@ func MGetVideos(ctx context.Context, videoIDs []int64) ([]*Video, error) {
 // GetFeed multiple get list of video info
 func GetFeed(ctx context.Context, latest_time string) ([]*Video, error) {
 	res := make([]*Video, 0)
-	if err := DB.WithContext(ctx).Where("created_at <= ?", latest_time).Limit(30).Order("id desc").Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("created_at < ?", latest_time).Limit(30).Order("id desc").Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
