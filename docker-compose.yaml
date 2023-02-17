@@ -6,7 +6,7 @@ services:
     volumes:
       - ./pkg/configs/sql:/docker-entrypoint-initdb.d
     ports:
-      - "3306:3306"
+      - "3308:3306"
     environment:
       - MYSQL_DATABASE=douyin
       - MYSQL_USER=douyin
@@ -18,11 +18,11 @@ services:
     image: 'bitnami/etcd:latest'
     environment:
       - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:10079
     ports:
-      - "2379:2379"
-      - "2380:2380"
-  
+      - "10079:2379"
+      - "10080:2380"
+
   # Collector
   otel-collector:
     image: otel/opentelemetry-collector-contrib-dev:latest
