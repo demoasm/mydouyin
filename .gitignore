@@ -2,3 +2,10 @@
 *.jpg
 static		  
 *.sh
+config
+docker-compose.yaml
+.idea
+cmd/comment/output
+cmd/favorite/output
+cmd/user/output
+cmd/relation/output
