@@ -2,12 +2,9 @@ package rpc
 
 import (
 	"context"
-	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/kitex_gen/douyincomment"
 	"mydouyin/kitex_gen/douyincomment/commentservice"
-	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/pkg/consts"
-	"mydouyin/pkg/errno"
 	"mydouyin/pkg/mw"
 
 	"github.com/cloudwego/kitex/client"
@@ -44,49 +41,14 @@ func initComment() {
 	commentClient = c
 }
 
-// Create
-func CreateComment(ctx context.Context, req *douyincomment.CreateCommentRequest) (int64, error) {
-	resp, err := commentClient.CreateComment(ctx, req)
-	if err != nil {
-		return 0, err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return 0, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	return resp.CommentId, err
+func CreateComment(ctx context.Context, req *douyincomment.CreateCommentRequest) (r *douyincomment.CreateCommentResponse, err error) {
+	return commentClient.CreateComment(ctx, req)
 }
 
-// Delete
-func DeleteComment(ctx context.Context, req *douyincomment.DeleteCommentRequest) error {
-	resp, err := commentClient.DeleteComment(ctx, req)
-	if err != nil {
-		return err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	return nil
+func DeleteComment(ctx context.Context, req *douyincomment.DeleteCommentRequest) (r *douyincomment.DeleteCommentResponse, err error) {
+	return commentClient.DeleteComment(ctx, req)
 }
 
-// Get List
-func GetVideoComments(ctx context.Context, req *douyincomment.GetVideoCommentsRequest) (comment_list []apimodel.Comment, err error) {
-	resp, err := commentClient.GetVideoComments(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	comment_list = make([]apimodel.Comment, 0, 50)
-	for _, rpc_comment := range resp.Comments {
-		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{rpc_comment.User}})
-		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
-			continue
-		}
-		user := apimodel.PackUser(r.Users[0])
-		comment := apimodel.PackComment(rpc_comment)
-		comment.Commentor = *user
-		comment_list = append(comment_list, *comment)
-	}
-	return
+func GetVideoComments(ctx context.Context, req *douyincomment.GetVideoCommentsRequest) (r *douyincomment.GetVideoCommentsResponse, err error) {
+	return commentClient.GetVideoComments(ctx, req)
 }

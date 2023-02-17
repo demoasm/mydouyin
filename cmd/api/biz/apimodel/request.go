@@ -2,7 +2,7 @@ package apimodel
 
 import "mime/multipart"
 
-type CreateUserRequest struct {
+type RegistUserRequest struct {
 	Username string `json:"username" query:"username" vd:"len($) > 0"`
 	Password string `json:"password" query:"password" vd:"len($) > 0"`
 }

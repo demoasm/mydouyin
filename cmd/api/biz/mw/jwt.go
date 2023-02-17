@@ -59,10 +59,17 @@ func InitJWT() {
 			if len(req.Username) == 0 || len(req.Password) == 0 {
 				return "", jwt.ErrMissingLoginValues
 			}
-			return rpc.CheckUser(context.Background(), &douyinuser.CheckUserRequest{
+			resp, err := rpc.CheckUser(context.Background(), &douyinuser.CheckUserRequest{
 				Username: req.Username,
 				Password: req.Password,
 			})
+			if err != nil {
+				return 0, err
+			}
+			if resp.BaseResp.StatusCode != 0 {
+				return 0, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+			}
+			return resp.UserId, nil
 		},
 		//设置登陆的响应函数
 		LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time, identity interface{}) {

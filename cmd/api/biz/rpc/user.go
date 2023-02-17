@@ -2,11 +2,9 @@ package rpc
 
 import (
 	"context"
-	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinuser/userservice"
 	"mydouyin/pkg/consts"
-	"mydouyin/pkg/errno"
 	"mydouyin/pkg/mw"
 
 	"github.com/cloudwego/kitex/client"
@@ -43,42 +41,14 @@ func initUser() {
 	userClient = c
 }
 
-//CreateUser create user info
-func CreateUser(ctx context.Context, req *douyinuser.CreateUserRequest) error {
-	resp, err := userClient.CreateUser(ctx, req)
-	if err != nil {
-		return err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	return nil
+func CreateUser(ctx context.Context, req *douyinuser.CreateUserRequest) (r *douyinuser.CreateUserResponse, err error) {
+	return userClient.CreateUser(ctx, req)
 }
 
-//CheckUser check user info
-func CheckUser(ctx context.Context, req *douyinuser.CheckUserRequest) (int64, error) {
-	resp, err := userClient.CheckUser(ctx, req)
-	if err != nil {
-		return 0, err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return 0, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	return resp.UserId, nil
+func CheckUser(ctx context.Context, req *douyinuser.CheckUserRequest) (r *douyinuser.CheckUserResponse, err error) {
+	return userClient.CheckUser(ctx, req)
 }
 
-//GetUser info by id
-func GetUser(ctx context.Context, req *douyinuser.MGetUserRequest) (*apimodel.User, error) {
-	resp, err := userClient.MGetUser(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	if len(resp.Users) < 1 {
-		return nil, errno.QueryErr
-	}
-	// resp.Users[0].IsFollow = true
-	return apimodel.PackUser(resp.Users[0]), nil
+func MGetUser(ctx context.Context, req *douyinuser.MGetUserRequest) (r *douyinuser.MGetUserResponse, err error) {
+	return userClient.MGetUser(ctx, req)
 }
