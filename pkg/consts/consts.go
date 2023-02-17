@@ -15,7 +15,7 @@ const (
 	FavoriteTableName   = "favorite"
 	RelationServiceName = "relation"
 	FavoriteServiceName = "douyinfavorite"
-	MySQLDefaultDSN     = "douyin:douyin@tcp(localhost:3306)/douyin?charset=utf8&parseTime=True&loc=Local"
+	MySQLDefaultDSN     = "douyin:douyin@tcp(localhost:3308)/douyin?charset=utf8&parseTime=True&loc=Local"
 	TCP                 = "tcp"
 	UserServiceAddr     = ":9000"
 	VideoServiceAddr    = ":10000"
@@ -23,12 +23,12 @@ const (
 	RelationServiceAddr = ":12000"
 	CommentServiceAddr  = ":13000"
 	ExportEndpoint      = ":4317"
-	ETCDAddress         = "127.0.0.1:2379"
+	ETCDAddress         = "127.0.0.1:10079"
 	DefaultLimit        = 10
 	EndPoint            = "oss-cn-qingdao.aliyuncs.com"
 	AKID                = "LTAI5tA3AdzJpEjDcukRT4Ks"
 	AKS                 = "aYjN0qjcpzTwAqUzngVB4HNWMLsrTl"
 	Bucket              = "jaxdy"
-	CDNURL              = "http://192.168.251.93:8080/"
+	CDNURL              = "http://172.21.247.181:8080/"
 	StaticRoot          = "/home/jszfree/mydouyin/"
 )
