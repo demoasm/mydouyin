@@ -13,18 +13,18 @@ type Response interface {
 }
 
 // @router /douyin/user/register [POST] Response
-type CreateUserResponse struct {
+type RegistUserResponse struct {
 	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
 	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
 	UserId     int64  `form:"user_id" json:"user_id" query:"user_id"`
 	Token      string `form:"token" json:"token" query:"token"`
 }
 
-func (res *CreateUserResponse) Send(c *app.RequestContext) {
+func (res *RegistUserResponse) Send(c *app.RequestContext) {
 	c.JSON(consts.StatusOK, res)
 }
 
-func (res *CreateUserResponse) SetErr(err error) {
+func (res *RegistUserResponse) SetErr(err error) {
 	Err := errno.ConvertErr(err)
 	res.StatusCode = Err.ErrCode
 	res.StatusMsg = Err.ErrMsg

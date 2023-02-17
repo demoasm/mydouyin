@@ -2,15 +2,10 @@ package rpc
 
 import (
 	"context"
-	"mydouyin/cmd/api/biz/apimodel"
-	"mydouyin/kitex_gen/douyinfavorite"
-	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/kitex_gen/douyinvideo/videoservice"
 	"mydouyin/pkg/consts"
-	"mydouyin/pkg/errno"
 	"mydouyin/pkg/mw"
-	"time"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
@@ -46,79 +41,22 @@ func initVideo() {
 	videoClient = c
 }
 
-//publish video create video info
-func PublishVideo(ctx context.Context, req *douyinvideo.CreateVideoRequest) error {
-	resp, err := videoClient.CreateVideo(ctx, req)
-	if err != nil {
-		return err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	return nil
+func CreateVideo(ctx context.Context, req *douyinvideo.CreateVideoRequest) (r *douyinvideo.CreateVideoResponse, err error) {
+	return videoClient.CreateVideo(ctx, req)
 }
 
-//GetFeed get feed by time
-func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (feed []apimodel.Video, next_time int64, err error) {
-	resp, err := videoClient.GetFeed(ctx, req)
-	if err != nil {
-		return nil, time.Now().Unix(), err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return nil, time.Now().Unix(), errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	feed = make([]apimodel.Video, 0, 30)
-	favorites := make([]*douyinfavorite.Favorite, 0)
-	for _, rpc_video := range resp.VideoList {
-		favorite := new(douyinfavorite.Favorite)
-		favorite.UserId = req.UserId
-		favorite.VideoId = rpc_video.VideoId
-		favorites = append(favorites, favorite)
-	}
-	isFavorites, err := favoriteClient.GetIsFavorite(ctx, &douyinfavorite.GetIsFavoriteRequest{FavoriteList: favorites})
-
-	if err != nil {
-		return nil, time.Now().Unix(), err
-	}
-
-	if len(resp.VideoList) != len(isFavorites.IsFavorites) {
-		return nil, time.Now().Unix(), errno.ServiceErr
-	}
-
-	for i := 0; i < len(resp.VideoList); i++ {
-		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{resp.VideoList[i].Author}})
-		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
-			continue
-		}
-		author := apimodel.PackUser(r.Users[0])
-		video := apimodel.PackVideo(resp.VideoList[i])
-		video.Author = *author
-		video.IsFavorite = isFavorites.IsFavorites[i]
-		feed = append(feed, *video)
-	}
-	next_time = resp.NextTime
-	return feed, next_time, nil
+func GetFeed(ctx context.Context, req *douyinvideo.GetFeedRequest) (r *douyinvideo.GetFeedResponse, err error) {
+	return videoClient.GetFeed(ctx, req)
 }
 
-//GetPublishList get video list by author
-func GetPublishList(ctx context.Context, req *douyinvideo.GetListRequest) (video_list []apimodel.Video, err error) {
-	resp, err := videoClient.GetList(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
-	}
-	video_list = make([]apimodel.Video, 0, 50)
-	for _, rpc_video := range resp.VideoList {
-		r, err := userClient.MGetUser(ctx, &douyinuser.MGetUserRequest{UserIds: []int64{rpc_video.Author}})
-		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
-			continue
-		}
-		author := apimodel.PackUser(r.Users[0])
-		video := apimodel.PackVideo(rpc_video)
-		video.Author = *author
-		video_list = append(video_list, *video)
-	}
-	return video_list, nil
+func GetList(ctx context.Context, req *douyinvideo.GetListRequest) (r *douyinvideo.GetListResponse, err error) {
+	return videoClient.GetList(ctx, req)
+}
+
+func MGetVideo(ctx context.Context, req *douyinvideo.MGetVideoRequest) (r *douyinvideo.MGetVideoResponse, err error) {
+	return videoClient.MGetVideoUser(ctx, req)
+}
+
+func DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest) (r *douyinvideo.DeleteVideoResponse, err error) {
+	return videoClient.DeleteVideo(ctx, req)
 }
