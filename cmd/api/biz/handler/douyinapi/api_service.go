@@ -335,7 +335,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{int64(id)})
+	users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
 	if err1 != nil {
 		err = err1
 		return
