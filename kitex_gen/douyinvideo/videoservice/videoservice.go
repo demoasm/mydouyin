@@ -24,6 +24,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"GetList":       kitex.NewMethodInfo(getListHandler, newVideoServiceGetListArgs, newVideoServiceGetListResult, false),
 		"MGetVideoUser": kitex.NewMethodInfo(mGetVideoUserHandler, newVideoServiceMGetVideoUserArgs, newVideoServiceMGetVideoUserResult, false),
 		"DeleteVideo":   kitex.NewMethodInfo(deleteVideoHandler, newVideoServiceDeleteVideoArgs, newVideoServiceDeleteVideoResult, false),
+		"GetTimeVideos": kitex.NewMethodInfo(getTimeVideosHandler, newVideoServiceGetTimeVideosArgs, newVideoServiceGetTimeVideosResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "douyinvideo",
@@ -129,6 +130,24 @@ func newVideoServiceDeleteVideoResult() interface{} {
 	return douyinvideo.NewVideoServiceDeleteVideoResult()
 }
 
+func getTimeVideosHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*douyinvideo.VideoServiceGetTimeVideosArgs)
+	realResult := result.(*douyinvideo.VideoServiceGetTimeVideosResult)
+	success, err := handler.(douyinvideo.VideoService).GetTimeVideos(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newVideoServiceGetTimeVideosArgs() interface{} {
+	return douyinvideo.NewVideoServiceGetTimeVideosArgs()
+}
+
+func newVideoServiceGetTimeVideosResult() interface{} {
+	return douyinvideo.NewVideoServiceGetTimeVideosResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -184,6 +203,16 @@ func (p *kClient) DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoR
 	_args.Req = req
 	var _result douyinvideo.VideoServiceDeleteVideoResult
 	if err = p.c.Call(ctx, "DeleteVideo", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetTimeVideos(ctx context.Context, req *douyinvideo.GetTimeVideosRequest) (r *douyinvideo.GetTimeVideosResponse, err error) {
+	var _args douyinvideo.VideoServiceGetTimeVideosArgs
+	_args.Req = req
+	var _result douyinvideo.VideoServiceGetTimeVideosResult
+	if err = p.c.Call(ctx, "GetTimeVideos", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

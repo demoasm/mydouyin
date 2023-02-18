@@ -34,6 +34,7 @@ type Video struct {
 	CommentCount  int    `form:"comment_count" json:"comment_count" query:"comment_count"`
 	IsFavorite    bool   `form:"is_favorite" json:"is_favorite" query:"is_favorite"`
 	Title         string `form:"title" json:"title" query:"title"`
+	UploadTime    string `form:"upload" json:"upload" query:"upload"`
 }
 
 func PackVideo(douyin_video *douyinvideo.Video) *Video {
@@ -46,6 +47,7 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 		CommentCount:  int(douyin_video.CommentCount),
 		IsFavorite:    douyin_video.IsFavorite,
 		Title:         douyin_video.Title,
+		UploadTime:    douyin_video.UploadTime,
 	}
 }
 

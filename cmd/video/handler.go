@@ -1,10 +1,10 @@
 package main
 
 import (
-	douyinvideo "mydouyin/kitex_gen/douyinvideo"
 	"context"
 	"mydouyin/cmd/video/pack"
 	"mydouyin/cmd/video/service"
+	douyinvideo "mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/errno"
 )
 
@@ -78,4 +78,18 @@ func (s *VideoServiceImpl) MGetVideoUser(ctx context.Context, req *douyinvideo.M
 func (s *VideoServiceImpl) DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest) (resp *douyinvideo.DeleteVideoResponse, err error) {
 	// TODO: Your code here...
 	return
+}
+
+// GetTimeVideos implements the VideoServiceImpl interface.
+func (s *VideoServiceImpl) GetTimeVideos(ctx context.Context, req *douyinvideo.GetTimeVideosRequest) (resp *douyinvideo.GetTimeVideosResponse, err error) {
+	resp = new(douyinvideo.GetTimeVideosResponse)
+	var videos []*douyinvideo.Video
+	videos, err = service.NewGetTimeVideosService(ctx).GetTimeVideos(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, nil
+	}
+	resp.VideoList = videos
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
 }
