@@ -22,31 +22,13 @@ func NewPublishService(ctx context.Context) *PublishService {
 
 func (s *PublishService) PublishVideo(req apimodel.PublishVideoRequest, user *apimodel.User) (*apimodel.PublishVideoResponse, error) {
 	resp := new(apimodel.PublishVideoResponse)
-	videourl, coverurl, err := videohandel.VH.UpLoadFile(req.Data)
+	videoName, err := videohandel.VH.UpLoadVideo(req.Data)
 	if err != nil {
 		return resp, err
 	}
-	rpc_resp, err := rpc.CreateVideo(s.ctx, &douyinvideo.CreateVideoRequest{
-		Author:   user.UserID,
-		PlayUrl:  videourl,
-		CoverUrl: coverurl,
-		Title:    req.Title,
-	})
-	if err != nil {
-		<-videohandel.VH.Signal
-		return resp, err
-	}
-	if rpc_resp.BaseResp.StatusCode != 0 {
-		<-videohandel.VH.Signal
-		return resp, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
-	}
-	// 接受并发错误
-	err = <-videohandel.VH.Signal
-	if err != nil {
-		// TODO:理论上不会出现err(划掉)
-		// 真的会有ERROR😅😅😅
-		return resp, err
-	}
+
+	go videohandel.VH.CommintCommand(videoName, user.UserID, req.Title, s.ctx)
+
 	return resp, nil
 }
 

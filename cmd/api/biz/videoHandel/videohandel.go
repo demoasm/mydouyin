@@ -2,34 +2,54 @@ package videohandel
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"log"
 	"mime/multipart"
+	"mydouyin/cmd/api/biz/rpc"
+	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
+	"mydouyin/pkg/errno"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type VideoHandel struct {
 	Root         string
 	RelativePath string
 	Signal       chan error
+	CommandQueue chan *command
 	client       *oss.Client
 	bucket       *oss.Bucket
+}
+
+type commandState int
+
+const (
+	begin commandState = iota
+	finishCoverUpLoad
+	allFinish
+)
+
+type command struct {
+	videoName string
+	userID    int64
+	title     string
+	ctx       context.Context
+	state     commandState
 }
 
 var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/mnt/d/Documents/demos/mydouyin/static/"
+	VH.Root = "/home/mao/Desktop/mydouyin/static/"
 	VH.Root = consts.StaticRoot + "static/"
 	VH.RelativePath = "static/"
 	VH.Signal = make(chan error)
+	VH.CommandQueue = make(chan *command, 20)
 
 	// 初始化OSS
 	// yourEndpoint填写Bucket对应的Endpoint 例https://oss-cn-hangzhou.aliyuncs.com
@@ -37,89 +57,98 @@ func Init() {
 	var err error
 	VH.client, err = oss.New(consts.EndPoint, consts.AKID, consts.AKS)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		panic(fmt.Sprintf("init videohandler error:%v", err))
 	}
 
 	// 填写存储空间名称
 	VH.bucket, err = VH.client.Bucket(consts.Bucket)
 	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
+		panic(fmt.Sprintf("init videohandler error:%v", err))
+	}
+	go VH.listen()
+}
+
+func (vh *VideoHandel) CommintCommand(VideoName string, UserID int64, Title string, ctx context.Context) {
+	vh.CommandQueue <- &command{
+		videoName: VideoName,
+		userID:    UserID,
+		title:     Title,
+		ctx:       ctx,
+		state:     begin,
 	}
 }
 
-// 异步上传
+func (vh *VideoHandel) listen() {
+	for {
+		cmd := <-vh.CommandQueue
+		log.Printf("[********VideoHandler********] recover command:%v", cmd)
+		err := vh.execCommand(cmd)
+		if err != nil || cmd.state != allFinish {
+			log.Printf("[********VideoHandler********] command exec fail, error:%v", err)
+			vh.CommandQueue <- cmd
+		} else {
+			log.Printf("[********VideoHandler********] command exec success!!!")
+		}
+	}
+}
 
-func (vh *VideoHandel) UpLoad(file *multipart.FileHeader, videoObject string, picObject string) {
+// 执行指令，视频上传成功后service提交指令给videohandler，handler只执行生成封面、入库等操作
+func (vh *VideoHandel) execCommand(cmd *command) error {
+	//执行指令，生成封面
+	// 截图格式
+	cover_name := "cover/" + time.Now().Format("2006-01-02-15:04:05") + ".jpg"
+	switch cmd.state {
+	case begin:
+		style := "video/snapshot,t_0,f_jpg,w_800,h_600"
+		// 根据视频名直接获取截图url
+		signedURL, err := vh.bucket.SignURL(cmd.videoName, oss.HTTPGet, 600, oss.Process(style))
+		if err != nil {
+			return err
+		}
+		pic, err := http.Get(signedURL)
+		if err != nil {
+			return err
+		}
+		defer pic.Body.Close()
+		reader := bufio.NewReader(pic.Body)
+
+		err = vh.bucket.PutObject(cover_name, reader)
+
+		if err != nil {
+			return err
+		}
+		cmd.state = finishCoverUpLoad
+		fallthrough
+	case finishCoverUpLoad:
+		//调rpc写库
+		resp, err := rpc.CreateVideo(cmd.ctx, &douyinvideo.CreateVideoRequest{
+			Author:   cmd.userID,
+			PlayUrl:  cmd.videoName,
+			CoverUrl: cover_name,
+			Title:    cmd.title,
+		})
+		if err != nil {
+			return err
+		}
+		if resp.BaseResp.StatusCode != 0 {
+			return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+		}
+		cmd.state = allFinish
+	}
+	return nil
+}
+
+func (vh *VideoHandel) UpLoadVideo(data *multipart.FileHeader) (videoName string, err error) {
 	// 获取文件流
-	filepoint, err := file.Open()
+	// 视频文件object名称
+	var filepoint multipart.File
+	filepoint, err = data.Open()
 	if err != nil {
 		return
 	}
 	defer filepoint.Close()
 	// 上传视频
-	err = vh.bucket.PutObject(videoObject, filepoint)
-	if err != nil {
-		vh.Signal <- err
-		return
-	}
-	// 截图格式
-	style := "video/snapshot,t_0,f_jpg,w_800,h_600"
-	// 根据视频名直接获取截图url
-	signedURL, err := vh.bucket.SignURL(videoObject, oss.HTTPGet, 600, oss.Process(style))
-	if err != nil {
-		vh.Signal <- err
-		return
-	}
-	pic, err := http.Get(signedURL)
-	if err != nil {
-		vh.Signal <- err
-		return
-	}
-	defer pic.Body.Close()
-	reader := bufio.NewReader(pic.Body)
-	// 再次上传截图
-	err = vh.bucket.PutObject(picObject, reader)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(-1)
-	}
-	hlog.Infof("upload Success")
-	vh.Signal <- nil
-}
-
-func (vh *VideoHandel) UpLoadFile(file *multipart.FileHeader) (videourl, coverurl string, err error) {
-
-	// 视频文件object名称
-	name := time.Now().Format("2006-01-02-15:04:05") + ".mp4"
-	// 构建Object名称
-	var viewObjBuilder strings.Builder
-	viewObjBuilder.WriteString("videos/")
-	viewObjBuilder.WriteString(name)
-	viewObjectName := viewObjBuilder.String()
-
-	// 封面文件object名称
-	cover_name := time.Now().Format("2006-01-02-15:04:05") + ".jpg"
-	// 构建Object名称
-	var picObjBuilder strings.Builder
-	picObjBuilder.WriteString("cover/")
-	picObjBuilder.WriteString(cover_name)
-	picObj := picObjBuilder.String()
-
-	// 构建前缀url
-	var resultPrefixBuilder strings.Builder
-	resultPrefixBuilder.WriteString("https://")
-	resultPrefixBuilder.WriteString(consts.Bucket)
-	resultPrefixBuilder.WriteString(".")
-	resultPrefixBuilder.WriteString(consts.EndPoint)
-	resultPrefixBuilder.WriteString("/")
-	resultPrefix := resultPrefixBuilder.String()
-	fmt.Println("***********************" + resultPrefix + viewObjectName)
-
-	// 开启协程上传
-	go vh.UpLoad(file, viewObjectName, picObj)
-
-	return resultPrefix + viewObjectName, resultPrefix + picObj, nil
-
+	videoName = "videos/" + time.Now().Format("2006-01-02-15:04:05") + ".mp4"
+	err = vh.bucket.PutObject(videoName, filepoint)
+	return
 }
