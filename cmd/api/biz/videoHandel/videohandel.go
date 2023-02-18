@@ -68,7 +68,7 @@ func Init() {
 	go VH.listen()
 }
 
-func (vh *VideoHandel) CommintCommand(VideoName string, UserID int64, Title string, ctx context.Context) {
+func (vh *VideoHandel) CommitCommand(VideoName string, UserID int64, Title string, ctx context.Context) {
 	vh.CommandQueue <- &command{
 		videoName: VideoName,
 		userID:    UserID,
