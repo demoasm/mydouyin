@@ -1,11 +1,10 @@
 *.mp4
-*.jpg
-static		  
+*.jpg	  
 *.sh
 config
 docker-compose.yaml
 .idea
-cmd/comment/output
-cmd/favorite/output
-cmd/user/output
-cmd/relation/output
+cmd/comment/output/*
+cmd/favorite/output/*
+cmd/user/output/*
+cmd/relation/output/*
