@@ -16,6 +16,7 @@ type Client interface {
 	GetList(ctx context.Context, req *douyinvideo.GetListRequest, callOptions ...callopt.Option) (r *douyinvideo.GetListResponse, err error)
 	MGetVideoUser(ctx context.Context, req *douyinvideo.MGetVideoRequest, callOptions ...callopt.Option) (r *douyinvideo.MGetVideoResponse, err error)
 	DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest, callOptions ...callopt.Option) (r *douyinvideo.DeleteVideoResponse, err error)
+	GetTimeVideos(ctx context.Context, req *douyinvideo.GetTimeVideosRequest, callOptions ...callopt.Option) (r *douyinvideo.GetTimeVideosResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -70,4 +71,9 @@ func (p *kVideoServiceClient) MGetVideoUser(ctx context.Context, req *douyinvide
 func (p *kVideoServiceClient) DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest, callOptions ...callopt.Option) (r *douyinvideo.DeleteVideoResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.DeleteVideo(ctx, req)
+}
+
+func (p *kVideoServiceClient) GetTimeVideos(ctx context.Context, req *douyinvideo.GetTimeVideosRequest, callOptions ...callopt.Option) (r *douyinvideo.GetTimeVideosResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetTimeVideos(ctx, req)
 }

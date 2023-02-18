@@ -60,3 +60,7 @@ func MGetVideo(ctx context.Context, req *douyinvideo.MGetVideoRequest) (r *douyi
 func DeleteVideo(ctx context.Context, req *douyinvideo.DeleteVideoRequest) (r *douyinvideo.DeleteVideoResponse, err error) {
 	return videoClient.DeleteVideo(ctx, req)
 }
+
+func GetTimeVideos(ctx context.Context, req *douyinvideo.GetTimeVideosRequest) (r *douyinvideo.GetTimeVideosResponse, err error) {
+	return videoClient.GetTimeVideos(ctx, req)
+}

@@ -52,6 +52,15 @@ func GetFeed(ctx context.Context, latest_time string) ([]*Video, error) {
 	return res, nil
 }
 
+// GetVideosFromTime
+func GetVideosFromTime(ctx context.Context, start, end string) ([]*Video, error) {
+	res := make([]*Video, 0)
+	if err := DB.WithContext(ctx).Where("created_at > ? AND created_at < ?", start, end).Limit(30).Order("id desc").Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 // MGetVideos multiple get list of video info
 func MGetVideosbyAuthor(ctx context.Context, authorID int64) ([]*Video, error) {
 	res := make([]*Video, 0)
