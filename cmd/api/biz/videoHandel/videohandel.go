@@ -44,8 +44,6 @@ func Init() {
 	VH.CommandQueue = make(chan *command, 20)
 
 	// 初始化OSS
-	// yourEndpoint填写Bucket对应的Endpoint 例https://oss-cn-hangzhou.aliyuncs.com
-	// 阿里云账号AccessKey拥有所有API的访问权限，风险很高。
 	var err error
 	VH.client, err = oss.New(consts.Endpoint, consts.AKID, consts.AKS)
 	if err != nil {
