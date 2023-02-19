@@ -52,7 +52,7 @@ func PackUser(douyin_user *douyinuser.User) *User {
 		FollowerCount:   douyin_user.FollowerCount,
 		Avatar:          avatar_list[int(douyin_user.UserId)%len(avatar_list)],
 		BackgroundImage: background_list[int(douyin_user.UserId)%len(background_list)],
-		Signature:       "你妈死了",
+		Signature:       "你🐎死了",
 		TotalFavoried:   0,
 		WorkCount:       0,
 		FavoriteCount:   0,
@@ -155,5 +155,3 @@ func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
 		VideoID:    douyin_favorite.VideoId,
 	}
 }
-
-

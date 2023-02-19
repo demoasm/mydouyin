@@ -28,6 +28,11 @@ const (
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:2379"
 	DefaultLimit        = 10
-	CDNURL              = "http://192.168.43.235:8080/"
-	StaticRoot          = "/home/mao/Desktop/douyin/"
+
+	//oss相关信息
+	Endpoint = "oss-cn-beijing.aliyuncs.com"
+	AKID     = "LTAI5tQ4x1ACnZo5brw92kxo"
+	AKS      = "SmEavhOQDQ2lBXBaiognBiLuS9N3K9"
+	Bucket   = "douyin-video-9567"
+	CDNURL   = "http://aliyun.maomint.cn/"
 )
