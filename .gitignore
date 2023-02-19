@@ -4,8 +4,4 @@
 config
 docker-compose.yaml
 .idea
-cmd/video/output/bin/douyinvideo
-cmd/user/output/bin/douyinuser
-cmd/relation/output/bin/relation
-cmd/favorite/output/bin/favorite
-cmd/comment/output/bin/comment
+**/output
