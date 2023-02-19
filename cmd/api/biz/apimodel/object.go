@@ -12,31 +12,56 @@ import (
 )
 
 type User struct {
-	UserID        int64  `form:"user_id" json:"id" query:"user_id"`
-	Username      string `form:"name" json:"name" query:"name"`
-	FollowCount   int64  `form:"follow_count" json:"follow_count" query:"follow_count"`
-	FollowerCount int64  `form:"follower_count" json:"follower_count" query:"follower_count"`
-	IsFollow      bool   `form:"is_follow" json:"is_follow" query:"is_follow"`
+	UserID          int64  `form:"user_id" json:"id" query:"user_id"`
+	Username        string `form:"name" json:"name" query:"name"`
+	FollowCount     int64  `form:"follow_count" json:"follow_count" query:"follow_count"`
+	FollowerCount   int64  `form:"follower_count" json:"follower_count" query:"follower_count"`
+	IsFollow        bool   `form:"is_follow" json:"is_follow" query:"is_follow"`
+	Avatar          string `form:"avatar" json:"avatar" query:"avatar"`
+	BackgroundImage string `form:"background_image" json:"background_image" query:"background_image"`
+	Signature       string `form:"signature" json:"signature" query:"signature"`
+	TotalFavoried   int64  `form:"total_favoried" json:"total_favoried" query:"total_favoried"`
+	WorkCount       int64  `form:"work_count" json:"work_count" query:"work_count"`
+	FavoriteCount   int64  `form:"favorite_count" json:"favorite_count" query:"favorite_count"`
+}
+
+var avatar_list map[int]string = map[int]string{
+	0: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldzkb7ij309q09qjsn.jpg",
+	1: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldztsvxj309q09qdha.jpg",
+	2: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule03d3zj309q09qjsm.jpg",
+	3: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0ckvpj309q09qwfh.jpg",
+	4: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0jgguj309q09qmya.jpg",
+	5: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0vqnhj309q09qwg2.jpg",
+	6: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1a2d3j309q09q0tp.jpg",
+	7: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1j42xj309q09qjsx.jpg",
+	8: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1szakj309q09qta0.jpg",
+}
+
+var background_list map[int]string = map[int]string{
+	0: "https://maomint.maomint.cn/douyin/background/125615ape48gysysgxbx0y.jpg",
+	1: "https://maomint.maomint.cn/douyin/background/125620l6lecc441lilqej6.jpg",
+	2: "https://maomint.maomint.cn/douyin/background/125631yyvjdud5j5tjm9m1.jpg",
+	3: "https://maomint.maomint.cn/douyin/background/index.jpg",
 }
 
 func PackUser(douyin_user *douyinuser.User) *User {
 	return &User{
-		UserID:        douyin_user.UserId,
-		Username:      douyin_user.Username,
-		FollowCount:   douyin_user.FollowCount,
-		FollowerCount: douyin_user.FollowerCount,
-		IsFollow:      false,
+		UserID:          douyin_user.UserId,
+		Username:        douyin_user.Username,
+		FollowCount:     douyin_user.FollowCount,
+		FollowerCount:   douyin_user.FollowerCount,
+		Avatar:          avatar_list[int(douyin_user.UserId)%len(avatar_list)],
+		BackgroundImage: background_list[int(douyin_user.UserId)%len(background_list)],
+		Signature:       "你妈死了",
+		TotalFavoried:   0,
+		WorkCount:       0,
+		FavoriteCount:   0,
+		IsFollow:        false,
 	}
 }
 
 func PackUserRelation(douyin_user *douyinuser.User, me int64) *User {
-	user := &User{
-		UserID:        douyin_user.UserId,
-		Username:      douyin_user.Username,
-		FollowCount:   douyin_user.FollowCount,
-		FollowerCount: douyin_user.FollowerCount,
-		IsFollow:      false,
-	}
+	user := PackUser(douyin_user)
 	r, err := rpc.ValidIfFollowRequest(context.Background(), &relation.ValidIfFollowRequest{FollowId: user.UserID, FollowerId: me})
 	if err != nil || r.BaseResp.StatusCode != 0 {
 		return user
@@ -130,3 +155,5 @@ func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
 		VideoID:    douyin_favorite.VideoId,
 	}
 }
+
+
