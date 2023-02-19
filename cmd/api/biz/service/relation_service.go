@@ -62,7 +62,7 @@ func (s *RelationService) RelationAction(req apimodel.RelationActionRequest, use
 func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerListRequest, user *apimodel.User, option int) (*apimodel.FollowAndFollowerListReponse, error) {
 	resp := new(apimodel.FollowAndFollowerListReponse)
 	var err error
-	users := make([]*apimodel.User, 0)
+	// users := make([]*apimodel.User, 0)
 	userIds := make([]int64, 0)
 	switch option {
 	case 1:
@@ -104,6 +104,6 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 		user.IsFollow = true
 		resp.UserList = append(resp.UserList, user)
 	}
-	resp.UserList = users
+	// resp.UserList = users
 	return resp, errno.Success
 }
