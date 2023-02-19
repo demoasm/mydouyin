@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"mydouyin/cmd/video/dal/db"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 	"time"
@@ -34,8 +35,16 @@ func CreateFavorite(ctx context.Context, favorites []*Favorite) error {
 			if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", f.UserId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
 				return err
 			}
+			videos := make([]*db.Video, 0)
+			if err := tx.WithContext(ctx).Model(&Video{}).Where("id = ?", f.VideoId).Find(&videos).Error; err != nil{
+				return err
+			}
+			for _,v := range videos{
+				if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", v.Author).Update("total_favorited", gorm.Expr("total_favorited + ?", 1)).Error; err != nil {
+					return err
+				}
+			}
 		}
-		
 		// 返回 nil 提交事务
 		return nil
 	})
@@ -56,6 +65,15 @@ func CancleFavorite(ctx context.Context, favorites []*Favorite) error {
 			}
 			if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", f.UserId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
 				return err
+			}
+			videos := make([]*db.Video, 0)
+			if err := tx.WithContext(ctx).Model(&Video{}).Where("id = ?", f.VideoId).Find(&videos).Error; err != nil{
+				return err
+			}
+			for _,v := range videos{
+				if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", v.Author).Update("total_favorited", gorm.Expr("total_favorited - ?", 1)).Error; err != nil {
+					return err
+				}
 			}
 		}
 		// 返回 nil 提交事务

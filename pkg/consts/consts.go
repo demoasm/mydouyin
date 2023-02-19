@@ -33,3 +33,22 @@ const (
 	Bucket   = "douyin-video-9567"
 	CDNURL   = "http://aliyun.maomint.cn/"
 )
+	//头像
+var AvatarList map[int]string = map[int]string{
+	0: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldzkb7ij309q09qjsn.jpg",
+	1: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldztsvxj309q09qdha.jpg",
+	2: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule03d3zj309q09qjsm.jpg",
+	3: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0ckvpj309q09qwfh.jpg",
+	4: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0jgguj309q09qmya.jpg",
+	5: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0vqnhj309q09qwg2.jpg",
+	6: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1a2d3j309q09q0tp.jpg",
+	7: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1j42xj309q09qjsx.jpg",
+	8: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1szakj309q09qta0.jpg",
+}
+	//背景
+var BackgroundList map[int]string = map[int]string{
+	0: "https://maomint.maomint.cn/douyin/background/125615ape48gysysgxbx0y.jpg",
+	1: "https://maomint.maomint.cn/douyin/background/125620l6lecc441lilqej6.jpg",
+	2: "https://maomint.maomint.cn/douyin/background/125631yyvjdud5j5tjm9m1.jpg",
+	3: "https://maomint.maomint.cn/douyin/background/index.jpg",
+}
