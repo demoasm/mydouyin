@@ -14,6 +14,7 @@ struct Video {
     6: i64 comment_count
     7: bool is_favorite
     8: string title
+    9: string upload_time
 }
 
 struct GetFeedRequest {
@@ -65,10 +66,22 @@ struct DeleteVideoResponse {
     1: BaseResp base_resp
 }
 
+struct GetTimeVideosRequest {
+    1: BaseResp base_resp
+    2: string start
+    3: string end
+}
+
+struct GetTimeVideosResponse {
+    1: BaseResp base_resp
+    2: list<Video> video_list
+}
+
 service VideoService {
     CreateVideoResponse CreateVideo(1: CreateVideoRequest req)
     GetFeedResponse GetFeed(1: GetFeedRequest req)
     GetListResponse GetList(1: GetListRequest req)
     MGetVideoResponse MGetVideoUser(1: MGetVideoRequest req)
     DeleteVideoResponse DeleteVideo(1: DeleteVideoRequest req)
+    GetTimeVideosResponse GetTimeVideos(1: GetTimeVideosRequest req)
 }
