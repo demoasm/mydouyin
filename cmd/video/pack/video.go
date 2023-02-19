@@ -18,6 +18,7 @@ func Video(v *db.Video) *douyinvideo.Video {
 		Title:         v.Title,
 		FavoriteCount: int64(v.FavoriteCount),
 		CommentCount:  int64(v.CommentCount),
+		UploadTime:    v.CreatedAt.Format("20060102.150405"),
 	}
 }
 func Videos(vs []*db.Video) []*douyinvideo.Video {

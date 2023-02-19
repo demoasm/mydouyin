@@ -3,6 +3,7 @@
 package main
 
 import (
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/mw"
 	"mydouyin/cmd/api/biz/rpc"
 	videohandel "mydouyin/cmd/api/biz/videoHandel"
@@ -19,6 +20,7 @@ func Init() {
 	mw.InitJWT()
 	videohandel.Init()
 	rpc.Init()
+	cache.Init()
 	//hlog init
 	hlog.SetLogger(hertzlogrus.NewLogger())
 	hlog.SetLevel(hlog.LevelInfo)
