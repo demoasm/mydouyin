@@ -20,11 +20,20 @@ struct User {
     3: i64 follow_count
     4: i64 follower_count
     5: bool is_follow
+    6: i64 favorite_count
+    7: i64 work_count
+    8: i64 total_favorited
+    9: string background_image
+    10: string avatar
+    11: string signature
 }
 
 struct CreateUserRequest {
     1: string username (vt.min_size = "1")
     2: string password (vt.min_size = "1")
+    3: string background_image
+    4: string avatar
+    5: string signature
 }
 
 struct CreateUserResponse {

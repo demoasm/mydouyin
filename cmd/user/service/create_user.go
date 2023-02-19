@@ -37,5 +37,8 @@ func (s *CreateUserService) CreateUser(req *douyinuser.CreateUserRequest) error 
 	return db.CreateUser(s.ctx, []*db.User{{
 		Username: req.Username,
 		Password: passWord,
+		Avatar: req.Avatar,
+		Signature: req.Signature,
+		BackgroundImage: req.BackgroundImage,
 	}})
 }

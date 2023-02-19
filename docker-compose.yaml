@@ -6,7 +6,7 @@ services:
     volumes:
       - ./pkg/configs/sql:/docker-entrypoint-initdb.d
     ports:
-      - "3308:3306"
+      - "3306:3306"
     environment:
       - MYSQL_DATABASE=douyin
       - MYSQL_USER=douyin
@@ -18,6 +18,8 @@ services:
     image: redis:latest
     ports:
     - "6379:6379"
+    volumes:
+      - ./pkg/configs/redis/redis.conf:/etc/redis/redis.conf
 
   # ETCD
   Etcd:

@@ -1,10 +1,14 @@
 package apimodel
 
 import (
+	"context"
+	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyincomment"
 	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
+	"mydouyin/kitex_gen/relation"
+	"mydouyin/pkg/consts"
 )
 
 type User struct {
@@ -25,6 +29,22 @@ func PackUser(douyin_user *douyinuser.User) *User {
 	}
 }
 
+func PackUserRelation(douyin_user *douyinuser.User, me int64) *User {
+	user := &User{
+		UserID:        douyin_user.UserId,
+		Username:      douyin_user.Username,
+		FollowCount:   douyin_user.FollowCount,
+		FollowerCount: douyin_user.FollowerCount,
+		IsFollow:      false,
+	}
+	r, err := rpc.ValidIfFollowRequest(context.Background(), &relation.ValidIfFollowRequest{FollowId: user.UserID, FollowerId: me})
+	if err != nil || r.BaseResp.StatusCode != 0 {
+		return user
+	}
+	user.IsFollow = r.IfFollow
+	return user
+}
+
 type Video struct {
 	VideoID       int64  `form:"id" json:"id" query:"id"`
 	Author        User   `form:"author" json:"author" query:"author"`
@@ -41,14 +61,22 @@ func PackVideo(douyin_video *douyinvideo.Video) *Video {
 	return &Video{
 		VideoID: douyin_video.VideoId,
 		// Author:        douyin_video.Author,
-		PlayUrl:       douyin_video.PlayUrl,
-		CoverUrl:      douyin_video.CoverUrl,
+		PlayUrl:       consts.CDNURL + douyin_video.PlayUrl,
+		CoverUrl:      consts.CDNURL + douyin_video.CoverUrl,
 		FavoriteCount: int(douyin_video.FavoriteCount),
 		CommentCount:  int(douyin_video.CommentCount),
 		IsFavorite:    douyin_video.IsFavorite,
 		Title:         douyin_video.Title,
 		UploadTime:    douyin_video.UploadTime,
 	}
+}
+
+func PackVideos(douyin_videos []*douyinvideo.Video) []*Video {
+	res := make([]*Video, 0, 30)
+	for _, douyin_video := range douyin_videos {
+		res = append(res, PackVideo(douyin_video))
+	}
+	return res
 }
 
 type FriendUser struct {

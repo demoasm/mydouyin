@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
@@ -24,6 +25,7 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) GetFeed(req apimodel.GetFeedRequest, userId int64) (*apimodel.GetFeedResponse, error) {
 	resp := new(apimodel.GetFeedResponse)
 	var err error
+	cache.VC.GetVideoList(req.LatestTime)
 	rpcResp, err := rpc.GetFeed(s.ctx, &douyinvideo.GetFeedRequest{
 		LatestTime: req.LatestTime,
 		UserId:     userId,
@@ -61,7 +63,12 @@ func (s *FeedService) GetFeed(req apimodel.GetFeedRequest, userId int64) (*apimo
 		if err != nil || r.BaseResp.StatusCode != 0 || len(r.Users) < 1 {
 			continue
 		}
-		author := apimodel.PackUser(r.Users[0])
+		var author *apimodel.User
+		if userId != -1 {
+			author = apimodel.PackUserRelation(r.Users[0], userId)
+		} else {
+			author = apimodel.PackUser(r.Users[0])
+		}
 		video := apimodel.PackVideo(rpcResp.VideoList[i])
 		video.Author = *author
 		video.IsFavorite = isFavorites.IsFavorites[i]

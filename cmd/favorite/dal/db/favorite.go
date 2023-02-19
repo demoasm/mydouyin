@@ -23,7 +23,7 @@ func (f *Favorite) TableName() string {
 
 // CreateVideo create video info
 func CreateFavorite(ctx context.Context, favorites []*Favorite) error {
-	DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.WithContext(ctx).Create(favorites).Error; err != nil {
 			return err
 		}
@@ -31,15 +31,19 @@ func CreateFavorite(ctx context.Context, favorites []*Favorite) error {
 			if err := tx.WithContext(ctx).Model(&Video{}).Where("id = ?", f.VideoId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
 				return err
 			}
+			if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", f.UserId).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
+				return err
+			}
 		}
+		
 		// 返回 nil 提交事务
 		return nil
 	})
-	return nil
+	return err
 }
 
 func CancleFavorite(ctx context.Context, favorites []*Favorite) error {
-	DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		for _, f := range favorites {
 			var favorite Favorite
 			if err := tx.Where("user_id = ? and video_id = ?", f.UserId, f.VideoId).Delete(&favorite).Error; err != nil {
@@ -50,11 +54,14 @@ func CancleFavorite(ctx context.Context, favorites []*Favorite) error {
 			if err := tx.WithContext(ctx).Model(&Video{}).Where("id = ?", f.VideoId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
 				return err
 			}
+			if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", f.UserId).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
+				return err
+			}
 		}
 		// 返回 nil 提交事务
 		return nil
 	})
-	return nil
+	return err
 }
 
 func QueryFavoriteById(ctx context.Context, favorites []*Favorite) ([]bool, error) {

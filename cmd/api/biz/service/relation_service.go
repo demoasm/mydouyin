@@ -100,9 +100,15 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 		return nil, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
 	}
 	for _, rpc_user := range ur.Users {
-		user := apimodel.PackUser(rpc_user)
-		user.IsFollow = true
-		resp.UserList = append(resp.UserList, user)
+		switch option {
+		case 1:
+			u := apimodel.PackUser(rpc_user)
+			u.IsFollow = true
+			resp.UserList = append(resp.UserList, u)
+		case 2:
+			u := apimodel.PackUserRelation(rpc_user, int64(user.UserID))
+			resp.UserList = append(resp.UserList, u)
+		}
 	}
 	// resp.UserList = users
 	return resp, errno.Success
