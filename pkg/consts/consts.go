@@ -25,10 +25,11 @@ const (
 	ExportEndpoint      = ":4317"
 	ETCDAddress         = "127.0.0.1:10079"
 	DefaultLimit        = 10
-	EndPoint            = "oss-cn-qingdao.aliyuncs.com"
-	AKID                = "LTAI5tA3AdzJpEjDcukRT4Ks"
-	AKS                 = "aYjN0qjcpzTwAqUzngVB4HNWMLsrTl"
-	Bucket              = "jaxdy"
-	CDNURL              = "http://jaxdy.oss-cn-qingdao.aliyuncs.com/"
-	StaticRoot          = "/home/mao/Desktop/mydouyin/"
+
+	//oss相关信息
+	Endpoint = "oss-cn-beijing.aliyuncs.com"
+	AKID     = "LTAI5tQ4x1ACnZo5brw92kxo"
+	AKS      = "SmEavhOQDQ2lBXBaiognBiLuS9N3K9"
+	Bucket   = "douyin-video-9567"
+	CDNURL   = "http://aliyun.maomint.cn/"
 )

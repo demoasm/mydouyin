@@ -1,8 +1,8 @@
 package videohandel
 
 import (
-	"bufio"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -10,16 +10,12 @@ import (
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
-	"net/http"
 	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
 
 type VideoHandel struct {
-	Root         string
-	RelativePath string
-	Signal       chan error
 	CommandQueue chan *command
 	client       *oss.Client
 	bucket       *oss.Bucket
@@ -45,17 +41,13 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.Root = "/home/mao/Desktop/mydouyin/static/"
-	VH.Root = consts.StaticRoot + "static/"
-	VH.RelativePath = "static/"
-	VH.Signal = make(chan error)
 	VH.CommandQueue = make(chan *command, 20)
 
 	// 初始化OSS
 	// yourEndpoint填写Bucket对应的Endpoint 例https://oss-cn-hangzhou.aliyuncs.com
 	// 阿里云账号AccessKey拥有所有API的访问权限，风险很高。
 	var err error
-	VH.client, err = oss.New(consts.EndPoint, consts.AKID, consts.AKS)
+	VH.client, err = oss.New(consts.Endpoint, consts.AKID, consts.AKS)
 	if err != nil {
 		panic(fmt.Sprintf("init videohandler error:%v", err))
 	}
@@ -99,24 +91,14 @@ func (vh *VideoHandel) execCommand(cmd *command) error {
 	cover_name := "cover/" + time.Now().Format("2006-01-02-15:04:05") + ".jpg"
 	switch cmd.state {
 	case begin:
-		style := "video/snapshot,t_0,f_jpg,w_800,h_600"
+		style := "video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast"
 		// 根据视频名直接获取截图url
-		signedURL, err := vh.bucket.SignURL(cmd.videoName, oss.HTTPGet, 600, oss.Process(style))
+		process := fmt.Sprintf("%s|sys/saveas,o_%v,b_%v", style, base64.URLEncoding.EncodeToString([]byte(cover_name)), base64.URLEncoding.EncodeToString([]byte(consts.Bucket)))
+		result, err := VH.bucket.ProcessObject(cmd.videoName, process)
 		if err != nil {
 			return err
 		}
-		pic, err := http.Get(signedURL)
-		if err != nil {
-			return err
-		}
-		defer pic.Body.Close()
-		reader := bufio.NewReader(pic.Body)
-
-		err = vh.bucket.PutObject(cover_name, reader)
-
-		if err != nil {
-			return err
-		}
+		log.Println(result.Status)
 		cmd.state = finishCoverUpLoad
 		fallthrough
 	case finishCoverUpLoad:
