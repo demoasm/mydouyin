@@ -7,9 +7,7 @@ import (
 
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/mw"
-	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/cmd/api/biz/service"
-	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 
@@ -329,17 +327,17 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, errno.AuthorizationFailedErr, nil)
 		return
 	}
-	id := user.(*apimodel.User).UserID
+	_ = user.(*apimodel.User).UserID
 	resp := new(apimodel.FriendListReponse)
 	defer func() {
 		resp.SetErr(err)
 		resp.Send(c)
 	}()
-	users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
-	if err1 != nil {
-		err = err1
-		return
-	}
-	resp.UserList = users
+	// // users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
+	// if err1 != nil {
+	// 	err = err1
+	// 	return
+	// }
+	// resp.UserList = users
 	err = errno.Success
 }

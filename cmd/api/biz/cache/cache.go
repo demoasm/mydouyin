@@ -3,7 +3,6 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-redis/redis/v8"
 	"log"
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/rpc"
@@ -12,6 +11,8 @@ import (
 	"mydouyin/kitex_gen/douyinvideo"
 	"strconv"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type RedisCache struct {
@@ -26,7 +27,7 @@ type RedisCache struct {
 var RC *RedisCache
 
 // Init the redis client
-func Init() {
+func init() {
 	RC = new(RedisCache)
 	RC.Ctx = context.Background()
 	RC.SetName = "videos"
@@ -34,9 +35,10 @@ func Init() {
 	RC.HeadTime = time.Now().Format("2006-01-02 15:04:05")
 	RC.Rdb = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "123456", // no password set
+		DB:       0,        // use default DB
 	})
+
 	//RC.InitGetVideos(strconv.Itoa(int(time.Now().Unix())), 1)
 	//video := &apimodel.Video{VideoID: 1, Author: apimodel.User{UserID: 1}, PlayUrl: "1", CoverUrl: "1", FavoriteCount: 1, CommentCount: 1, IsFavorite: true, Title: "lala"}
 	//fmt.Println(video)
