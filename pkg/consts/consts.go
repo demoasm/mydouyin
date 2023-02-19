@@ -26,12 +26,17 @@ const (
 	FavoriteServiceAddr = ":11000"
 	MessageServiceAddr  = ":14000"
 	ExportEndpoint      = ":4317"
-	ETCDAddress         = "127.0.0.1:2379"
+	ETCDAddress         = "127.0.0.1:10079"
 	DefaultLimit        = 10
-	CDNURL              = "http://192.168.43.235:8080/"
-	StaticRoot          = "/home/mao/Desktop/douyin/"
+	//oss相关信息
+	Endpoint = "oss-cn-beijing.aliyuncs.com"
+	AKID     = "LTAI5tQ4x1ACnZo5brw92kxo"
+	AKS      = "SmEavhOQDQ2lBXBaiognBiLuS9N3K9"
+	Bucket   = "douyin-video-9567"
+	CDNURL   = "http://aliyun.maomint.cn/"
 )
-	//头像
+
+//头像
 var AvatarList map[int]string = map[int]string{
 	0: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldzkb7ij309q09qjsn.jpg",
 	1: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldztsvxj309q09qdha.jpg",
@@ -43,7 +48,8 @@ var AvatarList map[int]string = map[int]string{
 	7: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1j42xj309q09qjsx.jpg",
 	8: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1szakj309q09qta0.jpg",
 }
-	//背景
+
+//背景
 var BackgroundList map[int]string = map[int]string{
 	0: "https://maomint.maomint.cn/douyin/background/125615ape48gysysgxbx0y.jpg",
 	1: "https://maomint.maomint.cn/douyin/background/125620l6lecc441lilqej6.jpg",
