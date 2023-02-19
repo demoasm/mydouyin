@@ -4,4 +4,4 @@
 config
 docker-compose.yaml
 .idea
-**/output
+cmd/user/output/bin/douyinuser
