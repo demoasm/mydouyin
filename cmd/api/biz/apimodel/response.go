@@ -230,3 +230,34 @@ func (res *GetFavoriteListResponse) SetErr(err error) {
 	res.StatusCode = Err.ErrCode
 	res.StatusMsg = Err.ErrMsg
 }
+
+type MessageChatResponse struct {
+	StatusCode  int64      `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg   string     `form:"status_msg" json:"status_msg" query:"status_msg"`
+	MessageList []*Message `form:"message_list" json:"message_list" query:"message_list"`
+}
+
+func (res *MessageChatResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *MessageChatResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}
+
+type MessageActionResponse struct {
+	StatusCode int64  `form:"status_code" json:"status_code" query:"status_code"`
+	StatusMsg  string `form:"status_msg" json:"status_msg" query:"status_msg"`
+}
+
+func (res *MessageActionResponse) Send(c *app.RequestContext) {
+	c.JSON(consts.StatusOK, res)
+}
+
+func (res *MessageActionResponse) SetErr(err error) {
+	Err := errno.ConvertErr(err)
+	res.StatusCode = Err.ErrCode
+	res.StatusMsg = Err.ErrMsg
+}

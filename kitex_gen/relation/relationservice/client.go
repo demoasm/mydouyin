@@ -15,6 +15,7 @@ type Client interface {
 	DeleteRelation(ctx context.Context, req *relation.DeleteRelationRequest, callOptions ...callopt.Option) (r *relation.BaseResp, err error)
 	GetFollow(ctx context.Context, req *relation.GetFollowListRequest, callOptions ...callopt.Option) (r *relation.GetFollowListResponse, err error)
 	GetFollower(ctx context.Context, req *relation.GetFollowerListRequest, callOptions ...callopt.Option) (r *relation.GetFollowerListResponse, err error)
+	GetFriend(ctx context.Context, req *relation.GetFriendRequest, callOptions ...callopt.Option) (r *relation.GetFriendResponse, err error)
 	ValidIfFollowRequest(ctx context.Context, req *relation.ValidIfFollowRequest, callOptions ...callopt.Option) (r *relation.ValidIfFollowResponse, err error)
 }
 
@@ -65,6 +66,11 @@ func (p *kRelationServiceClient) GetFollow(ctx context.Context, req *relation.Ge
 func (p *kRelationServiceClient) GetFollower(ctx context.Context, req *relation.GetFollowerListRequest, callOptions ...callopt.Option) (r *relation.GetFollowerListResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetFollower(ctx, req)
+}
+
+func (p *kRelationServiceClient) GetFriend(ctx context.Context, req *relation.GetFriendRequest, callOptions ...callopt.Option) (r *relation.GetFriendResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetFriend(ctx, req)
 }
 
 func (p *kRelationServiceClient) ValidIfFollowRequest(ctx context.Context, req *relation.ValidIfFollowRequest, callOptions ...callopt.Option) (r *relation.ValidIfFollowResponse, err error) {

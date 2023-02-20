@@ -23,6 +23,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"DeleteRelation":       kitex.NewMethodInfo(deleteRelationHandler, newRelationServiceDeleteRelationArgs, newRelationServiceDeleteRelationResult, false),
 		"GetFollow":            kitex.NewMethodInfo(getFollowHandler, newRelationServiceGetFollowArgs, newRelationServiceGetFollowResult, false),
 		"GetFollower":          kitex.NewMethodInfo(getFollowerHandler, newRelationServiceGetFollowerArgs, newRelationServiceGetFollowerResult, false),
+		"GetFriend":            kitex.NewMethodInfo(getFriendHandler, newRelationServiceGetFriendArgs, newRelationServiceGetFriendResult, false),
 		"ValidIfFollowRequest": kitex.NewMethodInfo(validIfFollowRequestHandler, newRelationServiceValidIfFollowRequestArgs, newRelationServiceValidIfFollowRequestResult, false),
 	}
 	extra := map[string]interface{}{
@@ -111,6 +112,24 @@ func newRelationServiceGetFollowerResult() interface{} {
 	return relation.NewRelationServiceGetFollowerResult()
 }
 
+func getFriendHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*relation.RelationServiceGetFriendArgs)
+	realResult := result.(*relation.RelationServiceGetFriendResult)
+	success, err := handler.(relation.RelationService).GetFriend(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newRelationServiceGetFriendArgs() interface{} {
+	return relation.NewRelationServiceGetFriendArgs()
+}
+
+func newRelationServiceGetFriendResult() interface{} {
+	return relation.NewRelationServiceGetFriendResult()
+}
+
 func validIfFollowRequestHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
 	realArg := arg.(*relation.RelationServiceValidIfFollowRequestArgs)
 	realResult := result.(*relation.RelationServiceValidIfFollowRequestResult)
@@ -174,6 +193,16 @@ func (p *kClient) GetFollower(ctx context.Context, req *relation.GetFollowerList
 	_args.Req = req
 	var _result relation.RelationServiceGetFollowerResult
 	if err = p.c.Call(ctx, "GetFollower", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) GetFriend(ctx context.Context, req *relation.GetFriendRequest) (r *relation.GetFriendResponse, err error) {
+	var _args relation.RelationServiceGetFriendArgs
+	_args.Req = req
+	var _result relation.RelationServiceGetFriendResult
+	if err = p.c.Call(ctx, "GetFriend", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

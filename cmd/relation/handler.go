@@ -100,3 +100,16 @@ func (s *RelationServiceImpl) ValidIfFollowRequest(ctx context.Context, req *rel
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
 	return resp, nil
 }
+
+// GetFriend implements the RelationServiceImpl interface.
+func (s *RelationServiceImpl) GetFriend(ctx context.Context, req *relation.GetFriendRequest) (resp *relation.GetFriendResponse, err error) {
+	// TODO: Your code here...
+	resp = new(relation.GetFriendResponse)
+	resp.FriendIds, err = service.NewGetFriendService(ctx).GetFriend(req)
+	if err != nil {
+		resp.BaseResp = pack.BuildBaseResp(err)
+		return resp, err
+	}
+	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	return resp, nil
+}

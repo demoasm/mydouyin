@@ -316,7 +316,27 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/relation/friend/list/ [GET] 开发中....
 func FriendList(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req apimodel.FollowAndFollowerListRequest
+	var req apimodel.FriendListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+
+	resp, err := service.NewRelationService(ctx).FriendList(req)
+	if err != nil {
+		resp.SetErr(err)
+		resp.Send(c)
+		return
+	}
+	resp.SetErr(errno.Success)
+	resp.Send(c)
+}
+
+// @router /douyin/message/chat/ [GET] 开发中....
+func MessageChat(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.MessageChatRequest
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		SendResponse(c, err, nil)
@@ -327,17 +347,36 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		SendResponse(c, errno.AuthorizationFailedErr, nil)
 		return
 	}
-	_ = user.(*apimodel.User).UserID
-	resp := new(apimodel.FriendListReponse)
-	defer func() {
+	resp, err := service.NewMessageService(ctx).MessageChat(req, user.(*apimodel.User))
+	if err != nil {
 		resp.SetErr(err)
 		resp.Send(c)
-	}()
-	// // users, err1 := rpc.GetFriendList(context.Background(), &relation.GetFollowerListRequest{FollowId: int64(id)})
-	// if err1 != nil {
-	// 	err = err1
-	// 	return
-	// }
-	// resp.UserList = users
-	err = errno.Success
+		return
+	}
+	resp.SetErr(errno.Success)
+	resp.Send(c)
+}
+
+// @router /douyin/message/action/ [POST] 开发中....
+func MessageAction(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req apimodel.MessageActionRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		SendResponse(c, err, nil)
+		return
+	}
+	user, exists := c.Get(consts.IdentityKey)
+	if !exists {
+		SendResponse(c, errno.AuthorizationFailedErr, nil)
+		return
+	}
+	resp, err := service.NewMessageService(ctx).MessageAction(req, user.(*apimodel.User))
+	if err != nil {
+		resp.SetErr(err)
+		resp.Send(c)
+		return
+	}
+	resp.SetErr(errno.Success)
+	resp.Send(c)
 }

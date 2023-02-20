@@ -96,3 +96,6 @@ func ValidIfFollowRequest(ctx context.Context, req *relation.ValidIfFollowReques
 // 	// }
 // 	return res, nil
 // }
+func GetFriend(ctx context.Context, req *relation.GetFriendRequest) (r *relation.GetFriendResponse, err error) {
+	return relationClient.GetFriend(ctx, req)
+}

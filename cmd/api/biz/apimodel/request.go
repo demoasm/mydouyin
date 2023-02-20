@@ -44,6 +44,11 @@ type FollowAndFollowerListRequest struct {
 	Token  string `json:"token" query:"token"`
 }
 
+type FriendListRequest struct {
+	UserId int64  `json:"user_id" query:"user_id"`
+	Token  string `json:"token" query:"token"`
+}
+
 type FavoriteActionRequest struct {
 	Token      string `json:"query" query:"token"`
 	VideoID    string `json:"video_id" query:"video_id"`
@@ -66,4 +71,17 @@ type CommentActionRequest struct {
 type CommentListRequest struct {
 	Token   string `json:"token" query:"token"`
 	VideoId string `json:"video_id" query:"video_id"`
+}
+
+type MessageChatRequest struct {
+	Token      string `json:"token" query:"token"`
+	ToUserId   int64  `json:"to_user_id" query:"to_user_id"`
+	PreMsgTime int64  `json:"pre_msg_time" query:"pre_msg_time"`
+}
+
+type MessageActionRequest struct {
+	Token      string `json:"token" query:"token"`
+	ToUserId   int64  `json:"to_user_id" query:"to_user_id"`
+	ActionType int32  `json:"action_type" query:"action_type"`
+	Content    string `json:"content" query:"content"`
 }
