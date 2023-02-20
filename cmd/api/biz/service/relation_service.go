@@ -113,3 +113,33 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 	// resp.UserList = users
 	return resp, errno.Success
 }
+
+func (s *RelationService) FriendList(req apimodel.FriendListRequest) (*apimodel.FriendListReponse, error) {
+	resp := new(apimodel.FriendListReponse)
+	var err error
+	// users := make([]*apimodel.User, 0)
+	rpc_resp, err := rpc.GetFriend(s.ctx, &relation.GetFriendRequest{
+		MeId: req.UserId,
+	})
+	if err != nil {
+		return resp, err
+	}
+	if rpc_resp.BaseResp.StatusCode != 0 {
+		return resp, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
+	}
+	ur, err := rpc.MGetUser(s.ctx, &douyinuser.MGetUserRequest{
+		UserIds: rpc_resp.FriendIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if ur.BaseResp.StatusCode != 0 {
+		return nil, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
+	}
+	for _, rpc_user := range ur.Users {
+		u := apimodel.PackFriendUser(rpc_user)
+		u.IsFollow = true
+		resp.UserList = append(resp.UserList, u)
+	}
+	return resp, nil
+}

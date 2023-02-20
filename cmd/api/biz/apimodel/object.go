@@ -7,6 +7,7 @@ import (
 	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
+	"mydouyin/kitex_gen/message"
 	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/consts"
 )
@@ -106,21 +107,13 @@ func PackVideos(douyin_videos []*douyinvideo.Video) []*Video {
 
 type FriendUser struct {
 	User
-	Avatar  string `form:"avatar" json:"avatar" query:"avatar"`
 	Message string `form:"message" json:"message" query:"message"`
 	MsgType int64  `form:"msgType" json:"msgType" query:"msgType"`
 }
 
 func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
 	return &FriendUser{
-		User{
-			UserID:        douyin_user.UserId,
-			Username:      douyin_user.Username,
-			FollowCount:   douyin_user.FollowCount,
-			FollowerCount: douyin_user.FollowerCount,
-			IsFollow:      false,
-		},
-		"url",
+		*PackUser(douyin_user),
 		"123",
 		1,
 	}
@@ -154,4 +147,26 @@ func PackVFavorite(douyin_favorite *douyinfavorite.Favorite) *Favorite {
 		UserID:     douyin_favorite.UserId,
 		VideoID:    douyin_favorite.VideoId,
 	}
+}
+
+type Message struct {
+	ID         int64  `form:"id" json:"id" query:"id"`
+	ToUserId   int64  `form:"to_user_id" json:"to_user_id" query:"to_user_id"`
+	FromUserId int64  `form:"from_user_id" json:"from_user_id" query:"from_user_id"`
+	Content    string `form:"content" json:"content" query:"content"`
+	CreateTime int64  `form:"create_time" json:"create_time" query:"create_time"`
+}
+
+func PackMessages(rpc_message []*message.Message) []*Message {
+	res := make([]*Message, 0, 50)
+	for _, res_msg := range rpc_message {
+		res = append(res, &Message{
+			ID:         res_msg.Id,
+			ToUserId:   res_msg.ToUserId,
+			FromUserId: res_msg.FromUserId,
+			Content:    res_msg.Content,
+			CreateTime: res_msg.CreateTime,
+		})
+	}
+	return res
 }

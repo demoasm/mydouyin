@@ -26,7 +26,7 @@ const (
 	FavoriteServiceAddr = ":11000"
 	MessageServiceAddr  = ":14000"
 	ExportEndpoint      = ":4317"
-	ETCDAddress         = "127.0.0.1:2379"
+	ETCDAddress         = "127.0.0.1:10079"
 	DefaultLimit        = 10
 
 	//oss相关信息

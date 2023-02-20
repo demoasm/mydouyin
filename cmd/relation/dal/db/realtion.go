@@ -77,3 +77,13 @@ func GetFollowsByFollower(ctx context.Context, follower_id int64) ([]*Relation, 
 	}
 	return res, nil
 }
+
+func GetFriend(ctx context.Context, me int64) ([]int64, error) {
+	res := make([]int64, 0)
+	if err := DB.WithContext(ctx).Table("relation a").Select("a.follow_id as friend_id").
+		Joins("left join relation b on a.follow_id = b.follower_id AND a.follower_id = b.follow_id").
+		Where("a.follower_id = ?", me).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}

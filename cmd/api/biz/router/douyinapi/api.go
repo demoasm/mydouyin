@@ -74,6 +74,11 @@ func Register(r *server.Hertz) {
 				_friend := _relation.Group("/friend")
 				_friend.GET("/list/",douyinapi.FriendList)
 			}
+			_message := _douyin.Group("/message", _messageMw()...)
+			{
+				_message.GET("/chat/", douyinapi.MessageChat)
+				_message.POST("/action/", douyinapi.MessageAction)
+			}
 		}
 	}
 }

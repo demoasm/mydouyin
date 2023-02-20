@@ -107,3 +107,9 @@ func _relationMw() []app.HandlerFunc {
 		mw.JwtMiddleware.MiddlewareFunc(),
 	}
 }
+
+func _messageMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.JwtMiddleware.MiddlewareFunc(),
+	}
+}

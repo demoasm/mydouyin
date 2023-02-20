@@ -33,6 +33,15 @@ struct GetFollowerListResponse {
     2: BaseResp base_resp
 }
 
+struct GetFriendRequest {
+    1: i64 me_id
+}
+
+struct GetFriendResponse {
+    1: list<i64> friend_ids
+    2: BaseResp base_resp
+}
+
 struct ValidIfFollowRequest {
     1: i64 follow_id
     2: i64 follower_id
@@ -48,5 +57,6 @@ service RelationService {
     BaseResp DeleteRelation(1: DeleteRelationRequest req)
     GetFollowListResponse GetFollow(1: GetFollowListRequest req)
     GetFollowerListResponse GetFollower(1: GetFollowerListRequest req)
+    GetFriendResponse GetFriend(1: GetFriendRequest req)
     ValidIfFollowResponse ValidIfFollowRequest(1: ValidIfFollowRequest req)
 }
