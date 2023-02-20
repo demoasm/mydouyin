@@ -58,14 +58,14 @@ func (c *VideoCache) pullVideoList() {
 	if err != nil {
 		return
 	}
-	_, err = rdeisClient.Set(c.ctx, "video_cache", val, time.Hour).Result()
+	_, err = redisClient.Set(c.ctx, "video_cache", val, time.Hour).Result()
 	if err != nil {
 		return
 	}
 }
 
 func (c *VideoCache) GetVideoList(lasted_time string) (videoList []*apimodel.Video, hit bool, err error) {
-	res, err := rdeisClient.Get(c.ctx, "video_cache").Result()
+	res, err := redisClient.Get(c.ctx, "video_cache").Result()
 	if err != nil {
 		return
 	}
