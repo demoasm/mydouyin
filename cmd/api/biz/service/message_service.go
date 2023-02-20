@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"log"
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/message"
 	"mydouyin/pkg/errno"
+	"sort"
 )
 
 type MessageService struct {
@@ -36,6 +38,7 @@ func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *
 
 func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apimodel.User) (resp *apimodel.MessageChatResponse, err error) {
 	resp = new(apimodel.MessageChatResponse)
+	log.Println(req.PreMsgTime)
 	rpc_resp_from, err := rpc.GetMessageList(s.ctx, &message.GetMessageListRequest{
 		FromUserId: user.UserID,
 		ToUserId:   req.ToUserId,
@@ -49,8 +52,8 @@ func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apim
 	}
 	message_list_from := apimodel.PackMessages(rpc_resp_from.MessageList)
 	rpc_resp_to, err := rpc.GetMessageList(s.ctx, &message.GetMessageListRequest{
-		FromUserId: user.UserID,
-		ToUserId:   req.ToUserId,
+		FromUserId: req.ToUserId,
+		ToUserId:   user.UserID,
 		PreMsgTime: req.PreMsgTime,
 	})
 	if err != nil {
@@ -59,7 +62,8 @@ func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apim
 	if rpc_resp_to.BaseResp.StatusCode != 0 {
 		return nil, errno.NewErrNo(rpc_resp_to.BaseResp.StatusCode, rpc_resp_to.BaseResp.StatusMessage)
 	}
-	message_list_to := apimodel.PackMessages(rpc_resp_from.MessageList)
+	message_list_to := apimodel.PackMessages(rpc_resp_to.MessageList)
 	resp.MessageList = append(message_list_from, message_list_to...)
+	sort.Sort(apimodel.MessageSorter(resp.MessageList))
 	return
 }

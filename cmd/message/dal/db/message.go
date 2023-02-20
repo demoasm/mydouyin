@@ -33,7 +33,7 @@ func CreateMessage(ctx context.Context, messages []*Message) error {
 // QueryUser query list of user info
 func QueryMessage(ctx context.Context, fromUserID int64, toUserID int64, preMsgTime int64) ([]*Message, error) {
 	res := make([]*Message, 0)
-	if err := DB.WithContext(ctx).Where("from_user_id = ? AND to_user_id = ? AND created_at > ?", fromUserID, toUserID, preMsgTime).Find(&res).Error; err != nil {
+	if err := DB.WithContext(ctx).Where("from_user_id = ? AND to_user_id = ? AND created_at > ?", fromUserID, toUserID, time.Unix(preMsgTime, 0).Format("2006-01-02 15:04:05")).Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil

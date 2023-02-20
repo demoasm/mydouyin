@@ -170,3 +170,13 @@ func PackMessages(rpc_message []*message.Message) []*Message {
 	}
 	return res
 }
+
+type MessageSorter []*Message
+
+func (s MessageSorter) Len() int { return len(s) }
+
+func (s MessageSorter) Less(i, j int) bool { return s[i].ID < s[j].ID }
+
+func (s MessageSorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
