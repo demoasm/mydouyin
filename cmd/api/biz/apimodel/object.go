@@ -22,7 +22,7 @@ type User struct {
 	Avatar          string `form:"avatar" json:"avatar" query:"avatar"`
 	BackgroundImage string `form:"background_image" json:"background_image" query:"background_image"`
 	Signature       string `form:"signature" json:"signature" query:"signature"`
-	TotalFavorited   int64  `form:"total_favorited" json:"total_favorited" query:"total_favoried"`
+	TotalFavorited  int64  `form:"total_favorited" json:"total_favorited" query:"total_favoried"`
 	WorkCount       int64  `form:"work_count" json:"work_count" query:"work_count"`
 	FavoriteCount   int64  `form:"favorite_count" json:"favorite_count" query:"favorite_count"`
 }
@@ -36,7 +36,7 @@ func PackUser(douyin_user *douyinuser.User) *User {
 		Avatar:          douyin_user.Avatar,
 		BackgroundImage: douyin_user.BackgroundImage,
 		Signature:       douyin_user.Signature,
-		TotalFavorited:   douyin_user.TotalFavorited,
+		TotalFavorited:  douyin_user.TotalFavorited,
 		WorkCount:       douyin_user.WorkCount,
 		FavoriteCount:   douyin_user.FavoriteCount,
 		IsFollow:        false,
@@ -89,22 +89,14 @@ func PackVideos(douyin_videos []*douyinvideo.Video) []*Video {
 
 type FriendUser struct {
 	User
-	Avatar  string `form:"avatar" json:"avatar" query:"avatar"`
 	Message string `form:"message" json:"message" query:"message"`
 	MsgType int64  `form:"msgType" json:"msgType" query:"msgType"`
 }
 
 func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
 	return &FriendUser{
-		User{
-			UserID:        douyin_user.UserId,
-			Username:      douyin_user.Username,
-			FollowCount:   douyin_user.FollowCount,
-			FollowerCount: douyin_user.FollowerCount,
-			IsFollow:      false,
-		},
-		"url",
-		"123",
+		*PackUser(douyin_user),
+		"有新消息",
 		1,
 	}
 }
