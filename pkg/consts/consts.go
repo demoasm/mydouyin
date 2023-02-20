@@ -30,4 +30,8 @@ const (
 	DefaultLimit        = 10
 	CDNURL              = "http://192.168.43.235:8080/"
 	StaticRoot          = "/home/mao/Desktop/douyin/"
+	Endpoint            = "oss-cn-qingdao.aliyuncs.com"
+	AKID                = "LTAI5tA3AdzJpEjDcukRT4Ks"
+	AKS                 = "aYjN0qjcpzTwAqUzngVB4HNWMLsrTl"
+	Bucket              = "jaxdy"
 )
