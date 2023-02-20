@@ -3,9 +3,11 @@ package videohandel
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"mime/multipart"
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/consts"
@@ -16,7 +18,7 @@ import (
 )
 
 type VideoHandel struct {
-	CommandQueue chan *command
+	MessageQueue *cache.MessageQueue
 	client       *oss.Client
 	bucket       *oss.Bucket
 }
@@ -29,20 +31,18 @@ const (
 	allFinish
 )
 
-type command struct {
-	videoName string
-	userID    int64
-	title     string
-	ctx       context.Context
-	state     commandState
+type Command struct {
+	VideoName string
+	UserID    int64
+	Title     string
+	State     commandState
 }
 
 var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.CommandQueue = make(chan *command, 20)
-
+	VH.MessageQueue = cache.NewMessageQueue(context.Background(), "upload_command")
 	// 初始化OSS
 	var err error
 	VH.client, err = oss.New(consts.Endpoint, consts.AKID, consts.AKS)
@@ -58,24 +58,30 @@ func Init() {
 	go VH.listen()
 }
 
-func (vh *VideoHandel) CommitCommand(VideoName string, UserID int64, Title string, ctx context.Context) {
-	vh.CommandQueue <- &command{
-		videoName: VideoName,
-		userID:    UserID,
-		title:     Title,
-		ctx:       ctx,
-		state:     begin,
-	}
+func (vh *VideoHandel) CommitCommand(VideoName string, UserID int64, Title string) {
+	data, _ := json.Marshal(Command{
+		VideoName: VideoName,
+		UserID:    UserID,
+		Title:     Title,
+		State:     begin,
+	})
+	vh.MessageQueue.ProductionMessage(data)
 }
 
 func (vh *VideoHandel) listen() {
 	for {
-		cmd := <-vh.CommandQueue
+		msg, err := vh.MessageQueue.ConsumeMessage()
+		if err != nil {
+			continue
+		}
+		var cmd Command
+		json.Unmarshal(msg, &cmd)
 		log.Printf("[********VideoHandler********] recover command:%v", cmd)
-		err := vh.execCommand(cmd)
-		if err != nil || cmd.state != allFinish {
+		err = vh.execCommand(&cmd)
+		if err != nil || cmd.State != allFinish {
 			log.Printf("[********VideoHandler********] command exec fail, error:%v", err)
-			vh.CommandQueue <- cmd
+			data, _ := json.Marshal(cmd)
+			vh.MessageQueue.ProductionMessage(data)
 		} else {
 			log.Printf("[********VideoHandler********] command exec success!!!")
 		}
@@ -83,29 +89,29 @@ func (vh *VideoHandel) listen() {
 }
 
 // 执行指令，视频上传成功后service提交指令给videohandler，handler只执行生成封面、入库等操作
-func (vh *VideoHandel) execCommand(cmd *command) error {
+func (vh *VideoHandel) execCommand(cmd *Command) error {
 	//执行指令，生成封面
 	// 截图格式
 	cover_name := "cover/" + time.Now().Format("2006-01-02-15:04:05") + ".jpg"
-	switch cmd.state {
+	switch cmd.State {
 	case begin:
 		style := "video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast"
 		// 根据视频名直接获取截图url
 		process := fmt.Sprintf("%s|sys/saveas,o_%v,b_%v", style, base64.URLEncoding.EncodeToString([]byte(cover_name)), base64.URLEncoding.EncodeToString([]byte(consts.Bucket)))
-		result, err := VH.bucket.ProcessObject(cmd.videoName, process)
+		result, err := VH.bucket.ProcessObject(cmd.VideoName, process)
 		if err != nil {
 			return err
 		}
 		log.Println(result.Status)
-		cmd.state = finishCoverUpLoad
+		cmd.State = finishCoverUpLoad
 		fallthrough
 	case finishCoverUpLoad:
 		//调rpc写库
-		resp, err := rpc.CreateVideo(cmd.ctx, &douyinvideo.CreateVideoRequest{
-			Author:   cmd.userID,
-			PlayUrl:  cmd.videoName,
+		resp, err := rpc.CreateVideo(context.Background(), &douyinvideo.CreateVideoRequest{
+			Author:   cmd.UserID,
+			PlayUrl:  cmd.VideoName,
 			CoverUrl: cover_name,
-			Title:    cmd.title,
+			Title:    cmd.Title,
 		})
 		if err != nil {
 			return err
@@ -113,7 +119,7 @@ func (vh *VideoHandel) execCommand(cmd *command) error {
 		if resp.BaseResp.StatusCode != 0 {
 			return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
 		}
-		cmd.state = allFinish
+		cmd.State = allFinish
 	}
 	return nil
 }

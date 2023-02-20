@@ -18,9 +18,9 @@ import (
 
 func Init() {
 	mw.InitJWT()
-	videohandel.Init()
 	rpc.Init()
 	cache.Init()
+	videohandel.Init()
 	//hlog init
 	hlog.SetLogger(hertzlogrus.NewLogger())
 	hlog.SetLevel(hlog.LevelInfo)

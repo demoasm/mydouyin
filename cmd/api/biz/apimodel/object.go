@@ -10,6 +10,7 @@ import (
 	"mydouyin/kitex_gen/message"
 	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/consts"
+	"mydouyin/pkg/errno"
 )
 
 type User struct {
@@ -106,6 +107,35 @@ func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
 		"123",
 		1,
 	}
+}
+
+func PackFriendUsers(douyin_users []*douyinuser.User, me int64) ([]*FriendUser, error) {
+	res := make([]*FriendUser, 0, len(douyin_users))
+	friendIds := make([]int64, 0, len(douyin_users))
+	for _, douyin_user := range douyin_users {
+		res = append(res, PackFriendUser(douyin_user))
+		friendIds = append(friendIds, douyin_user.UserId)
+	}
+	rpc_resp, err := rpc.GetFirstMessage(context.Background(), &message.GetFirstMessageRequest{
+		Id:        me,
+		FriendIds: friendIds,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if rpc_resp.BaseResp.StatusCode != 0 {
+		return nil, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
+	}
+	if len(rpc_resp.FirstMessageList) != len(res) {
+		return nil, errno.QueryErr
+	}
+	for i, message := range rpc_resp.FirstMessageList {
+		if res[i].UserID == message.FriendId {
+			res[i].Message = message.Message
+			res[i].MsgType = message.MsgType
+		}
+	}
+	return res, nil
 }
 
 type Comment struct {

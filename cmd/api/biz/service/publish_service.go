@@ -27,7 +27,7 @@ func (s *PublishService) PublishVideo(req apimodel.PublishVideoRequest, user *ap
 		return resp, err
 	}
 
-	go videohandel.VH.CommitCommand(videoName, user.UserID, req.Title, s.ctx)
+	go videohandel.VH.CommitCommand(videoName, user.UserID, req.Title)
 
 	return resp, nil
 }

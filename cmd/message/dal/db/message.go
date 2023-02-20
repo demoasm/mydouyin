@@ -69,18 +69,21 @@ func MGetFirstMessage(ctx context.Context, userID int64, friendIDs []int64) ([]*
 		time1, ok1 := msg1_map[friend_id]
 		time2, ok2 := msg2_map[friend_id]
 		if (!ok1) && (!ok2) {
-			res = append(res, &FirstMessage{MsgType: -1})
+			res = append(res, &FirstMessage{FirendID: friend_id, MsgType: -1})
 		} else if ok1 && (!ok2) {
 			if err := tx.Model(&Message{}).Select("to_user_id as friend_id,content as message").Where("created_at = ?", time1).Find(&first_message).Error; err != nil {
 				return nil, err
 			}
 			first_message[0].MsgType = 1
-
+			first_message[0].FirendID = friend_id
+			res = append(res, append([]*FirstMessage{}, first_message[0])...)
 		} else if (!ok1) && ok2 {
 			if err := tx.Model(&Message{}).Select("from_user_id as friend_id,content as message").Where("created_at = ?", time2).Find(&first_message).Error; err != nil {
 				return nil, err
 			}
 			first_message[0].MsgType = 0
+			first_message[0].FirendID = friend_id
+			res = append(res, append([]*FirstMessage{}, first_message[0])...)
 		} else {
 			if time1.Unix() > time2.Unix() {
 				if err := tx.Model(&Message{}).Select("to_user_id as friend_id,content as message").Where("created_at = ?", time1).Find(&first_message).Error; err != nil {
@@ -93,6 +96,7 @@ func MGetFirstMessage(ctx context.Context, userID int64, friendIDs []int64) ([]*
 				}
 				first_message[0].MsgType = 0
 			}
+			first_message[0].FirendID = friend_id
 			res = append(res, append([]*FirstMessage{}, first_message[0])...)
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinuser"
+	"mydouyin/kitex_gen/message"
 	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/errno"
 	"strconv"
@@ -127,19 +128,48 @@ func (s *RelationService) FriendList(req apimodel.FriendListRequest) (*apimodel.
 	if rpc_resp.BaseResp.StatusCode != 0 {
 		return resp, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
 	}
+	if len(rpc_resp.FriendIds) == 0 {
+		resp.UserList = make([]*apimodel.FriendUser, 0)
+		return resp, nil
+	}
 	ur, err := rpc.MGetUser(s.ctx, &douyinuser.MGetUserRequest{
 		UserIds: rpc_resp.FriendIds,
 	})
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	if ur.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
+		return resp, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
 	}
 	for _, rpc_user := range ur.Users {
 		u := apimodel.PackFriendUser(rpc_user)
 		u.IsFollow = true
 		resp.UserList = append(resp.UserList, u)
 	}
+
+	gfm_resp, err := rpc.GetFirstMessage(s.ctx, &message.GetFirstMessageRequest{
+		Id:        req.UserId,
+		FriendIds: rpc_resp.FriendIds,
+	})
+	if err != nil {
+		return resp, err
+	}
+	if gfm_resp.BaseResp.StatusCode != 0 {
+		return resp, errno.NewErrNo(gfm_resp.BaseResp.StatusCode, gfm_resp.BaseResp.StatusMessage)
+	}
+	if len(gfm_resp.FirstMessageList) != len(resp.UserList) {
+		return resp, errno.QueryErr
+	}
+	for i, message := range gfm_resp.FirstMessageList {
+		if resp.UserList[i].UserID == message.FriendId {
+			if resp.UserList[i].MsgType == -1 {
+				resp.UserList[i].Message = ""
+			} else {
+				resp.UserList[i].Message = message.Message
+			}
+			resp.UserList[i].MsgType = message.MsgType
+		}
+	}
+
 	return resp, nil
 }
