@@ -16,7 +16,7 @@ func NewCreateMessageService(ctx context.Context) *CreateMessageService {
 }
 
 // CreateMessage create message info.
-func (s *CreateMessageService) CreateMessage(req *message.CreateMessageRequest) error {
+func (s *CreateMessageService) CreateMessage(req *message.CreateMessageRequest) (id, create_time int64, err error) {
 	return db.CreateMessage(s.ctx, []*db.Message{{
 		FromUserID: int(req.FromUserId),
 		ToUserID:   int(req.ToUserId),

@@ -29,7 +29,9 @@ struct CreateMessageRequest {
 }
 
 struct CreateMessageResponse {
-    1: BaseResp base_resp
+    1: i64 id
+    2: i64 create_time
+    3: BaseResp base_resp
 }
 
 struct GetMessageListRequest {

@@ -22,16 +22,9 @@ func NewMessageService(ctx context.Context) *MessageService {
 
 func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *apimodel.User) (resp *apimodel.MessageActionResponse, err error) {
 	resp = new(apimodel.MessageActionResponse)
-	rpc_resp, err := rpc.CreateMessage(s.ctx, &message.CreateMessageRequest{
-		FromUserId: user.UserID,
-		ToUserId:   req.ToUserId,
-		Content:    req.Content,
-	})
+	err = cache.MC.CommitCreateMessageCommand(user.UserID, req.ToUserId, req.Content)
 	if err != nil {
 		return resp, err
-	}
-	if rpc_resp.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
 	}
 	return resp, nil
 }
@@ -39,12 +32,12 @@ func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *
 func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apimodel.User) (resp *apimodel.MessageChatResponse, err error) {
 	resp = new(apimodel.MessageChatResponse)
 	messageList, hit, err := cache.MC.GetMessage(user.UserID, req.ToUserId, req.PreMsgTime)
-	if err != nil{
+	if err != nil {
 		return
 	}
-	if hit{
+	if hit {
 		resp.MessageList = messageList
-		return 
+		return
 	}
 	rpc_resp_from, err := rpc.GetMessageList(s.ctx, &message.GetMessageListRequest{
 		FromUserId: user.UserID,
