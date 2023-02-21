@@ -22,28 +22,9 @@ type User struct {
 	Avatar          string `form:"avatar" json:"avatar" query:"avatar"`
 	BackgroundImage string `form:"background_image" json:"background_image" query:"background_image"`
 	Signature       string `form:"signature" json:"signature" query:"signature"`
-	TotalFavoried   int64  `form:"total_favoried" json:"total_favoried" query:"total_favoried"`
+	TotalFavorited  int64  `form:"total_favorited" json:"total_favorited" query:"total_favoried"`
 	WorkCount       int64  `form:"work_count" json:"work_count" query:"work_count"`
 	FavoriteCount   int64  `form:"favorite_count" json:"favorite_count" query:"favorite_count"`
-}
-
-var avatar_list map[int]string = map[int]string{
-	0: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldzkb7ij309q09qjsn.jpg",
-	1: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3uldztsvxj309q09qdha.jpg",
-	2: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule03d3zj309q09qjsm.jpg",
-	3: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0ckvpj309q09qwfh.jpg",
-	4: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0jgguj309q09qmya.jpg",
-	5: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule0vqnhj309q09qwg2.jpg",
-	6: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1a2d3j309q09q0tp.jpg",
-	7: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1j42xj309q09qjsx.jpg",
-	8: "https://maomint.maomint.cn/douyin/avatar/006LfQcply1g3ule1szakj309q09qta0.jpg",
-}
-
-var background_list map[int]string = map[int]string{
-	0: "https://maomint.maomint.cn/douyin/background/125615ape48gysysgxbx0y.jpg",
-	1: "https://maomint.maomint.cn/douyin/background/125620l6lecc441lilqej6.jpg",
-	2: "https://maomint.maomint.cn/douyin/background/125631yyvjdud5j5tjm9m1.jpg",
-	3: "https://maomint.maomint.cn/douyin/background/index.jpg",
 }
 
 func PackUser(douyin_user *douyinuser.User) *User {
@@ -52,12 +33,12 @@ func PackUser(douyin_user *douyinuser.User) *User {
 		Username:        douyin_user.Username,
 		FollowCount:     douyin_user.FollowCount,
 		FollowerCount:   douyin_user.FollowerCount,
-		Avatar:          avatar_list[int(douyin_user.UserId)%len(avatar_list)],
-		BackgroundImage: background_list[int(douyin_user.UserId)%len(background_list)],
-		Signature:       "你🐎死了",
-		TotalFavoried:   0,
-		WorkCount:       0,
-		FavoriteCount:   0,
+		Avatar:          douyin_user.Avatar,
+		BackgroundImage: douyin_user.BackgroundImage,
+		Signature:       douyin_user.Signature,
+		TotalFavorited:  douyin_user.TotalFavorited,
+		WorkCount:       douyin_user.WorkCount,
+		FavoriteCount:   douyin_user.FavoriteCount,
 		IsFollow:        false,
 	}
 }
@@ -115,7 +96,7 @@ type FriendUser struct {
 func PackFriendUser(douyin_user *douyinuser.User) *FriendUser {
 	return &FriendUser{
 		*PackUser(douyin_user),
-		"123",
+		"有新消息",
 		1,
 	}
 }

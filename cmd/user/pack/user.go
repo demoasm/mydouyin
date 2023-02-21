@@ -16,6 +16,12 @@ func User(u *db.User) *douyinuser.User {
 		Username:      u.Username,
 		FollowCount:   int64(u.FollowCount),
 		FollowerCount: int64(u.FollowerCount),
+		TotalFavorited: int64(u.TotalFavorited),
+		FavoriteCount: int64(u.FavoriteCount),
+		WorkCount: int64(u.WorkCount),
+		Avatar: u.Avatar,
+		Signature: u.Signature,
+		BackgroundImage: u.BackgroundImage,
 	}
 }
 

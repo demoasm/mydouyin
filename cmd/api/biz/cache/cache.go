@@ -160,15 +160,3 @@ func (cache *RedisCache) GetVideosFromCache(reqTime string) []apimodel.Video {
 // when the number > 240
 // set the systemTime to the middle of all cache
 // in order to save the memory
-
-// 怎么去拥有一道彩虹🌈
-// 怎么去拥抱一夏天的风🌀
-// 天上的星星笑地上的人⭐
-// 总是不能懂不能觉得足够🌃
-
-// 如果我爱上你的笑容🥰
-// 要怎么收藏要怎么拥有😐
-// 如果你快乐再不是为我🧋
-// 会不会放手其实才是拥有👋
-
-// ———《知足》

@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"math/rand"
 	"mydouyin/cmd/api/biz/apimodel"
+	//"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinuser"
+	"mydouyin/pkg/consts"
 	"mydouyin/pkg/errno"
 	"strconv"
 )
@@ -22,8 +25,11 @@ func NewUserService(ctx context.Context) *UserService {
 func (s *UserService) RegistUser(req apimodel.RegistUserRequest) (*apimodel.RegistUserResponse, error) {
 	resp := new(apimodel.RegistUserResponse)
 	rpc_resp, err := rpc.CreateUser(context.Background(), &douyinuser.CreateUserRequest{
-		Username: req.Username,
-		Password: req.Password,
+		Username:        req.Username,
+		Password:        req.Password,
+		Avatar:          consts.AvatarList[rand.Intn(len(consts.AvatarList))],
+		BackgroundImage: consts.BackgroundList[rand.Intn(len(consts.BackgroundList))],
+		Signature:       "Hello World!",
 	})
 	if err != nil {
 		return resp, err
@@ -41,6 +47,10 @@ func (s *UserService) GetUser(req apimodel.GetUserRequest) (*apimodel.GetUserRes
 		err = errno.ParamErr
 		return resp, err
 	}
+	// err = cache.MC.InitMessageFromDB(int64(id))
+	// if err != nil {
+	// 	return nil, err
+	// }
 	rpc_resp, err := rpc.MGetUser(s.ctx, &douyinuser.MGetUserRequest{UserIds: []int64{int64(id)}})
 	if err != nil {
 		return nil, err

@@ -9,9 +9,12 @@ import (
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/message"
+	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/errno"
 	"strconv"
 	"time"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type MessageCache struct {
@@ -32,39 +35,6 @@ func initMessageCache() {
 	MC.keyName = "message_list"
 	MC.mq = NewCommandQueue(context.Background(), "message")
 	go MC.listen()
-}
-
-//当接收到messageChat请求时调用该函数从缓存中拉取全部最新消息，如果
-func (c *MessageCache) GetMessageList(from_user_id, to_user_id int64) []*apimodel.Message {
-	key := md5.Sum([]byte(strconv.FormatInt(from_user_id, 10) + strconv.FormatInt(to_user_id, 10) + c.keyName))
-	results, err := redisClient.SMembers(c.mq.ctx, string(key[:])).Result()
-	if err != nil {
-		return []*apimodel.Message{}
-	}
-	msg_list := make([]*apimodel.Message, 0, 50)
-	for _, result := range results {
-		msg := new(apimodel.Message)
-		err = json.Unmarshal([]byte(result), msg)
-		if err != nil {
-			continue
-		}
-		msg_list = append(msg_list, msg)
-	}
-	return msg_list
-}
-
-func (c *MessageCache) AddMessage(from_user_id, to_user_id int64, content string) error {
-	//提交增加message的指令
-	cmd, _ := json.Marshal(CreateMessageCommand{
-		FromUserId: from_user_id,
-		ToUserId:   to_user_id,
-		Content:    content,
-	})
-	err := c.mq.ProductionMessage(cmd)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (c *MessageCache) listen() {
@@ -142,7 +112,6 @@ func (c *MessageCache) setMsgToSet(msg *apimodel.Message) error {
 	return nil
 }
 
-//传入我的id和我朋友列表的id，返回对应朋友的第一条消息，若未命中则未nil，以及err
 func (c *MessageCache) hash_key(id1, id2 int64) uint64 {
 	if id1 > id2 {
 		return uint64(id2 | id1<<32)
@@ -150,6 +119,7 @@ func (c *MessageCache) hash_key(id1, id2 int64) uint64 {
 		return uint64(id1 | (id2 << 32))
 	}
 }
+
 func (c *MessageCache) GetFirstMessage(me int64, friendIds []int64) (frist_msg_list []*apimodel.FristMessage) {
 	frist_msg_list = make([]*apimodel.FristMessage, 0, len(friendIds))
 	for _, friendId := range friendIds {
@@ -181,4 +151,121 @@ func (c *MessageCache) GetFirstMessage(me int64, friendIds []int64) (frist_msg_l
 //设置最新消息
 func (c *MessageCache) SetFirstMessage(msg *apimodel.Message) (err error) {
 	return c.setMsgToSet(msg)
+}
+
+func (c *MessageCache) SaveMessage(messages []*apimodel.Message) error {
+	for i := 0; i < len(messages); i++ {
+		message, _ := json.Marshal(messages[i])
+
+		// msgKey := md5.Sum([]byte(strconv.FormatInt(messages[i].ID, 10) + strconv.FormatInt(messages[i].ToUserId, 10) + c.keyname))
+		msgKey := strconv.FormatUint(c.hash_key(messages[i].FromUserId, messages[i].ToUserId), 10) + c.keyName
+		_, err := redisClient.ZAdd(c.mq.ctx, string(msgKey[:]), &redis.Z{Score: float64(messages[i].CreateTime), Member: message}).Result()
+		if err != nil {
+			return err
+		}
+		_, err1 := redisClient.Expire(c.mq.ctx, string(msgKey[:]), time.Minute*30).Result()
+		if err1 != nil {
+			return err1
+		}
+	}
+	return nil
+}
+
+func (c *MessageCache) InitMessageFromDB(fromUserID int64) error {
+	resp, err := rpc.GetFriend(c.mq.ctx, &relation.GetFriendRequest{
+		MeId: fromUserID,
+	})
+	if err != nil {
+		return nil
+	}
+	friendIds := resp.FriendIds
+	for i := 0; i < len(friendIds); i++ {
+		msgkey := md5.Sum([]byte(strconv.FormatInt(fromUserID, 10) + strconv.FormatInt(friendIds[i], 10) + c.keyName))
+		ex, err := redisClient.Exists(c.mq.ctx, string(msgkey[:])).Result()
+		if err != nil {
+			return err
+		}
+		if ex == 1 {
+			// 从数据库拉取所有我发的消息
+			resp, err := rpc.GetMessageList(c.mq.ctx, &message.GetMessageListRequest{
+				FromUserId: fromUserID,
+				ToUserId:   friendIds[i],
+				PreMsgTime: time.Now().Unix(),
+			})
+			if err != nil {
+				return nil
+			}
+			// 存入缓存
+			err = c.SaveMessage(apimodel.PackMessages(resp.MessageList))
+			if err != nil {
+				return err
+			}
+		}
+		msgkey = md5.Sum([]byte(strconv.FormatInt(friendIds[i], 10) + strconv.FormatInt(fromUserID, 10) + c.keyName))
+		ex, err = redisClient.Exists(c.mq.ctx, string(msgkey[:])).Result()
+		if err != nil {
+			return err
+		}
+		if ex == 1 {
+			// 从数据库拉取所有发给我的消息
+			resp, err := rpc.GetMessageList(c.mq.ctx, &message.GetMessageListRequest{
+				FromUserId: friendIds[i],
+				ToUserId:   fromUserID,
+				PreMsgTime: time.Now().Unix(),
+			})
+			if err != nil {
+				return nil
+			}
+			// 存入缓存
+			err = c.SaveMessage(apimodel.PackMessages(resp.MessageList))
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime int64) ([]*apimodel.Message, bool, error) {
+	messageList := make([]*apimodel.Message, 0)
+	// log.Println(fromUserID, toUserID)
+	// msgkey := md5.Sum([]byte(strconv.FormatInt(fromUserID, 10) + strconv.FormatInt(toUserID, 10) + c.keyname))
+	msgkey := strconv.FormatUint(c.hash_key(fromUserID, toUserID), 10) + c.keyName
+	ex, err := redisClient.Exists(c.mq.ctx, msgkey).Result()
+	if err != nil {
+		return nil, false, err
+	}
+	if ex == 0 {
+		return nil, false, nil
+	}
+	values, err := redisClient.ZRange(c.mq.ctx, msgkey, preMsgTime, -1).Result()
+	// log.Println(values)
+	if err != nil {
+		return nil, false, err
+	}
+	for i := 0; i < len(values); i++ {
+		message := new(apimodel.Message)
+		err = json.Unmarshal([]byte(values[i]), &message)
+		messageList = append(messageList, message)
+		if err != nil {
+			continue
+		}
+	}
+	return messageList, true, nil
+
+	// if(len(values) == 0){
+	// 	rpc_resp, err := rpc.GetMessageList(c.ctx, &message.GetMessageListRequest{
+	// 		FromUserId: fromUserID,
+	// 		ToUserId: toUserID,
+	// 		PreMsgTime: preMsgTime,
+	// 	})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	messages := apimodel.PackMessages(rpc_resp.MessageList)
+	// 	c.SaveMessage(messages)
+	// 	return messages, nil
+	// }else{
+
+	// }
 }

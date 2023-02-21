@@ -4,7 +4,6 @@ package douyinapi
 
 import (
 	"context"
-
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/mw"
 	"mydouyin/cmd/api/biz/service"
@@ -174,6 +173,7 @@ func RegistUser(ctx context.Context, c *app.RequestContext) {
 // @router /douyin/user/login/ [POST]
 func CheckUser(ctx context.Context, c *app.RequestContext) {
 	mw.JwtMiddleware.LoginHandler(ctx, c)
+
 }
 
 // GetUser .
@@ -191,6 +191,8 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		resp.SetErr(err)
 		resp.Send(c)
 	}
+
+
 	resp.SetErr(errno.Success)
 	resp.Send(c)
 }

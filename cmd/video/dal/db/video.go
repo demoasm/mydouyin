@@ -23,11 +23,20 @@ func (v *Video) TableName() string {
 
 // CreateVideo create video info
 func CreateVideo(ctx context.Context, videos []*Video) ([]int64, error) {
-	err := DB.WithContext(ctx).Create(videos).Error
 	idList := make([]int64, 0)
-	for _, i := range videos {
-		idList = append(idList, int64(i.ID))
-	}
+	err := DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.WithContext(ctx).Create(videos).Error; err != nil{
+			return err
+		}
+		for _, i := range videos {
+			idList = append(idList, int64(i.ID))
+			if err := tx.WithContext(ctx).Model(&User{}).Where("id = ?", i.Author).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
+				return err
+			}
+		}
+		// 返回 nil 提交事务
+		return nil	
+	})
 	return idList, err
 }
 

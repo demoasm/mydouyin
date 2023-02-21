@@ -10,6 +10,8 @@ gnome-terminal -t "favorite_service.sh" -- bash -c "sh ./start_script/start_favo
 
 gnome-terminal -t "comment_service.sh" -- bash -c "sh ./start_script/start_comment.sh; exec bash"
 
+gnome-terminal -t "message_service.sh" -- bash -c "sh ./start_script/start_message.sh; exec bash"
+
 gnome-terminal -t "api_service.sh" -- bash -c "sh ./start_script/start_api.sh; exec bash"
 
 
