@@ -26,8 +26,13 @@ func (u *Message) TableName() string {
 }
 
 // CreateMessage create message info
-func CreateMessage(ctx context.Context, messages []*Message) error {
-	return DB.WithContext(ctx).Create(messages).Error
+func CreateMessage(ctx context.Context, messages []*Message) (id, create_time int64, err error) {
+	result := DB.WithContext(ctx).Create(messages)
+	if result.Error != nil {
+		err = result.Error
+		return
+	}
+	return int64(messages[0].ID), messages[0].CreatedAt.Unix(), err
 }
 
 // QueryUser query list of user info

@@ -18,7 +18,7 @@ import (
 )
 
 type VideoHandel struct {
-	MessageQueue *cache.MessageQueue
+	CommandQueue *cache.CommandQueue
 	client       *oss.Client
 	bucket       *oss.Bucket
 }
@@ -42,7 +42,7 @@ var VH *VideoHandel
 
 func Init() {
 	VH = new(VideoHandel)
-	VH.MessageQueue = cache.NewMessageQueue(context.Background(), "upload_command")
+	VH.CommandQueue = cache.NewCommandQueue(context.Background(), "upload_command")
 	// 初始化OSS
 	var err error
 	VH.client, err = oss.New(consts.Endpoint, consts.AKID, consts.AKS)
@@ -65,12 +65,12 @@ func (vh *VideoHandel) CommitCommand(VideoName string, UserID int64, Title strin
 		Title:     Title,
 		State:     begin,
 	})
-	vh.MessageQueue.ProductionMessage(data)
+	vh.CommandQueue.ProductionMessage(data)
 }
 
 func (vh *VideoHandel) listen() {
 	for {
-		msg, err := vh.MessageQueue.ConsumeMessage()
+		msg, err := vh.CommandQueue.ConsumeMessage()
 		if err != nil {
 			continue
 		}
@@ -81,7 +81,7 @@ func (vh *VideoHandel) listen() {
 		if err != nil || cmd.State != allFinish {
 			log.Printf("[********VideoHandler********] command exec fail, error:%v", err)
 			data, _ := json.Marshal(cmd)
-			vh.MessageQueue.ProductionMessage(data)
+			vh.CommandQueue.ProductionMessage(data)
 		} else {
 			log.Printf("[********VideoHandler********] command exec success!!!")
 		}

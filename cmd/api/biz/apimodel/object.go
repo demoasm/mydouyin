@@ -187,6 +187,12 @@ type Message struct {
 	CreateTime int64  `form:"create_time" json:"create_time" query:"create_time"`
 }
 
+type FristMessage struct {
+	FriendId int64
+	MsgType  int //0表示接收的 1表示发送的 -1表示为空
+	Content  string
+}
+
 func PackMessages(rpc_message []*message.Message) []*Message {
 	res := make([]*Message, 0, 50)
 	for _, res_msg := range rpc_message {

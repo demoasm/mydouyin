@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/message"
@@ -147,27 +148,67 @@ func (s *RelationService) FriendList(req apimodel.FriendListRequest) (*apimodel.
 		resp.UserList = append(resp.UserList, u)
 	}
 
-	gfm_resp, err := rpc.GetFirstMessage(s.ctx, &message.GetFirstMessageRequest{
-		Id:        req.UserId,
-		FriendIds: rpc_resp.FriendIds,
-	})
-	if err != nil {
-		return resp, err
+	//先走缓存，从缓存中查看能不能得到friendlist
+	frist_msg_list := cache.MC.GetFirstMessage(req.UserId, rpc_resp.FriendIds)
+	missFriendId := make([]int64, 0)
+	missFriend := make([]*apimodel.FriendUser, 0)
+	// log.Println("cache中查到的fristlist", frist_msg_list)
+	for i, frist_msg := range frist_msg_list {
+		if frist_msg.MsgType == -1 {
+			//miss了
+			missFriendId = append(missFriendId, frist_msg.FriendId)
+			missFriend = append(missFriend, resp.UserList[i])
+		} else {
+			resp.UserList[i].Message = frist_msg.Content
+			resp.UserList[i].MsgType = int64(frist_msg.MsgType)
+		}
 	}
-	if gfm_resp.BaseResp.StatusCode != 0 {
-		return resp, errno.NewErrNo(gfm_resp.BaseResp.StatusCode, gfm_resp.BaseResp.StatusMessage)
-	}
-	if len(gfm_resp.FirstMessageList) != len(resp.UserList) {
-		return resp, errno.QueryErr
-	}
-	for i, message := range gfm_resp.FirstMessageList {
-		if resp.UserList[i].UserID == message.FriendId {
-			if resp.UserList[i].MsgType == -1 {
-				resp.UserList[i].Message = ""
-			} else {
-				resp.UserList[i].Message = message.Message
+	// log.Println("miss的friendId", missFriendId)
+	if len(missFriend) != 0 {
+		//调RPC方法走MySql数据库
+		gfm_resp, err := rpc.GetFirstMessage(s.ctx, &message.GetFirstMessageRequest{
+			Id:        req.UserId,
+			FriendIds: missFriendId,
+		})
+		if err != nil {
+			return resp, err
+		}
+		if gfm_resp.BaseResp.StatusCode != 0 {
+			return resp, errno.NewErrNo(gfm_resp.BaseResp.StatusCode, gfm_resp.BaseResp.StatusMessage)
+		}
+		if len(gfm_resp.FirstMessageList) != len(missFriend) {
+			return resp, errno.QueryErr
+		}
+		for i, message := range gfm_resp.FirstMessageList {
+			if missFriend[i].UserID == message.FriendId {
+				if message.MsgType == -1 {
+					missFriend[i].Message = ""
+				} else {
+					missFriend[i].Message = message.Message
+				}
+				missFriend[i].MsgType = message.MsgType
 			}
-			resp.UserList[i].MsgType = message.MsgType
+			//miss了就更新缓存
+			// log.Println("miss了,更新redis缓存", missFriendId)
+			if message.MsgType == 1 {
+				cache.MC.SetFirstMessage(&apimodel.Message{
+					ToUserId:   message.FriendId,
+					FromUserId: req.UserId,
+					Content:    message.Message,
+				})
+			} else if message.MsgType == 0 {
+				cache.MC.SetFirstMessage(&apimodel.Message{
+					ToUserId:   req.UserId,
+					FromUserId: message.FriendId,
+					Content:    message.Message,
+				})
+			} else {
+				cache.MC.SetFirstMessage(&apimodel.Message{
+					ToUserId:   req.UserId,
+					FromUserId: message.FriendId,
+					Content:    "",
+				})
+			}
 		}
 	}
 

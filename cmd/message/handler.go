@@ -19,12 +19,14 @@ func (s *MessageServiceImpl) CreateMessage(ctx context.Context, req *message.Cre
 		resp.BaseResp = pack.BuildBaseResp(errno.ParamErr)
 		return resp, nil
 	}
-	err = service.NewCreateMessageService(ctx).CreateMessage(req)
+	id, create_time, err := service.NewCreateMessageService(ctx).CreateMessage(req)
 	if err != nil {
 		resp.BaseResp = pack.BuildBaseResp(err)
 		return resp, nil
 	}
 	resp.BaseResp = pack.BuildBaseResp(errno.Success)
+	resp.CreateTime = create_time
+	resp.Id = id
 	return resp, nil
 }
 
