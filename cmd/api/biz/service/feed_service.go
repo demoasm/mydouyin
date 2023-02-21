@@ -24,7 +24,7 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) GetFeed(req apimodel.GetFeedRequest, userId int64) (*apimodel.GetFeedResponse, error) {
 	resp := new(apimodel.GetFeedResponse)
 	var err error
-	// cache.VC.GetVideoList(req.LatestTime)
+
 	rpcResp, err := rpc.GetFeed(s.ctx, &douyinvideo.GetFeedRequest{
 		LatestTime: req.LatestTime,
 		UserId:     userId,

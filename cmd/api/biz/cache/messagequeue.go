@@ -4,6 +4,8 @@ import (
 	"context"
 )
 
+//消息队列，调用ProductionMessage将指令结构体放入redis的list中，另起一个线程调用ConsumeMessage接收消息，反序列化指令结构体交给自定义的handler函数执行
+//在videoHandel中有使用
 type MessageQueue struct {
 	ListName string
 	ctx      context.Context
