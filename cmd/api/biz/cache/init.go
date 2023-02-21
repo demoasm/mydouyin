@@ -11,4 +11,5 @@ func Init() {
 		DB:       0,  // use default DB
 	})
 	// initVideoCache()
+	initMessageCache()
 }

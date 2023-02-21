@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/message"
 	"mydouyin/pkg/errno"
@@ -38,7 +39,14 @@ func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *
 
 func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apimodel.User) (resp *apimodel.MessageChatResponse, err error) {
 	resp = new(apimodel.MessageChatResponse)
-	log.Println(req.PreMsgTime)
+	messageList, hit, err := cache.MC.GetMessage(user.UserID, req.ToUserId, req.PreMsgTime)
+	if err != nil{
+		return
+	}
+	if hit{
+		resp.MessageList = messageList
+		return 
+	}
 	rpc_resp_from, err := rpc.GetMessageList(s.ctx, &message.GetMessageListRequest{
 		FromUserId: user.UserID,
 		ToUserId:   req.ToUserId,
@@ -65,5 +73,6 @@ func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apim
 	message_list_to := apimodel.PackMessages(rpc_resp_to.MessageList)
 	resp.MessageList = append(message_list_from, message_list_to...)
 	sort.Sort(apimodel.MessageSorter(resp.MessageList))
+	cache.MC.SaveMessage(resp.MessageList)
 	return
 }
