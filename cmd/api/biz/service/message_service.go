@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"

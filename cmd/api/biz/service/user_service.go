@@ -4,6 +4,8 @@ import (
 	"context"
 	"math/rand"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/cmd/api/biz/cache"
+
 	//"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinuser"
@@ -47,10 +49,12 @@ func (s *UserService) GetUser(req apimodel.GetUserRequest) (*apimodel.GetUserRes
 		err = errno.ParamErr
 		return resp, err
 	}
-	// err = cache.MC.InitMessageFromDB(int64(id))
-	// if err != nil {
-	// 	return nil, err
-	// }
+
+	err = cache.MC.InitMessageFromDB(int64(id))
+	if err != nil {
+		return nil, err
+	}
+
 	rpc_resp, err := rpc.MGetUser(s.ctx, &douyinuser.MGetUserRequest{UserIds: []int64{int64(id)}})
 	if err != nil {
 		return nil, err
