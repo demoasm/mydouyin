@@ -22,16 +22,9 @@ func NewMessageService(ctx context.Context) *MessageService {
 
 func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *apimodel.User) (resp *apimodel.MessageActionResponse, err error) {
 	resp = new(apimodel.MessageActionResponse)
-	rpc_resp, err := rpc.CreateMessage(s.ctx, &message.CreateMessageRequest{
-		FromUserId: user.UserID,
-		ToUserId:   req.ToUserId,
-		Content:    req.Content,
-	})
+	err = cache.MC.CommitCreateMessageCommand(user.UserID, req.ToUserId, req.Content)
 	if err != nil {
 		return resp, err
-	}
-	if rpc_resp.BaseResp.StatusCode != 0 {
-		return nil, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
 	}
 	return resp, nil
 }
