@@ -252,20 +252,4 @@ func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime i
 		}
 	}
 	return messageList, true, nil
-
-	// if(len(values) == 0){
-	// 	rpc_resp, err := rpc.GetMessageList(c.ctx, &message.GetMessageListRequest{
-	// 		FromUserId: fromUserID,
-	// 		ToUserId: toUserID,
-	// 		PreMsgTime: preMsgTime,
-	// 	})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	messages := apimodel.PackMessages(rpc_resp.MessageList)
-	// 	c.SaveMessage(messages)
-	// 	return messages, nil
-	// }else{
-
-	// }
 }
