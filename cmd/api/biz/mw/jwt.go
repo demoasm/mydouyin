@@ -28,7 +28,7 @@ func InitJWT() {
 		//设置获取当前时间的函数
 		TimeFunc: time.Now,
 		//token的过期时间
-		Timeout: time.Hour,
+		Timeout: 24 * time.Hour,
 		//最大token刷新时间，允许客户端在tokenTime+MaxRefresh内刷新token的有效时间，追加一个timeout时长
 		MaxRefresh: time.Hour,
 		//用于设置检索身份的键 默认indentity

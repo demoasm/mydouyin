@@ -17,7 +17,7 @@ const (
 	FavoriteTableName   = "favorite"
 	RelationServiceName = "relation"
 	FavoriteServiceName = "douyinfavorite"
-	MySQLDefaultDSN     = "douyin:douyin@tcp(localhost:3306)/douyin?charset=utf8&parseTime=True&loc=Local"
+	MySQLDefaultDSN     = "douyin:douyin@tcp(localhost:3306)/douyin?charset=utf8mb4&parseTime=True&loc=Local"
 	TCP                 = "tcp"
 	UserServiceAddr     = ":9000"
 	VideoServiceAddr    = ":10000"

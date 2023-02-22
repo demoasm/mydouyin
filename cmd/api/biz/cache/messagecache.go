@@ -71,6 +71,7 @@ func (c *MessageCache) listen() {
 			log.Printf("[********MessageCache********] command exec fail, error:%v", err)
 			data, _ := json.Marshal(cmd)
 			c.mq.ProductionMessage(data)
+			time.Sleep(time.Second * 10)
 		} else {
 			log.Printf("[********MessageCache********] command exec success!!!")
 		}
@@ -177,7 +178,7 @@ func (c *MessageCache) GetFirstMessage(me int64, friendIds []int64) (frist_msg_l
 	return
 }
 
-//设置最新消息
+// 设置最新消息
 func (c *MessageCache) SetFirstMessage(msg *apimodel.Message) (err error) {
 	return c.setMsgToSet(msg)
 }
@@ -195,7 +196,7 @@ func (c *MessageCache) SaveMessage(messages []*apimodel.Message) error {
 		if err != nil {
 			return err
 		}
-		_, err1 := redisClient.Expire(c.mq.ctx, msgKey, time.Minute*30).Result()
+		_, err1 := redisClient.Expire(c.mq.ctx, msgKey, time.Hour*12).Result()
 		if err1 != nil {
 			return err1
 		}
@@ -209,60 +210,50 @@ func (c *MessageCache) InitMessageFromDB(fromUserID int64) error {
 		MeId: fromUserID,
 	})
 	if err != nil {
-		return nil
+		return err
 	}
 	friendIds := resp.FriendIds
 	for i := 0; i < len(friendIds); i++ {
-		msgkey := md5.Sum([]byte(strconv.FormatInt(fromUserID, 10) + strconv.FormatInt(friendIds[i], 10) + c.keyName))
-		ex, err := redisClient.Exists(c.mq.ctx, string(msgkey[:])).Result()
+		msgkey := strconv.FormatUint(c.hash_key(fromUserID, friendIds[i]), 10) + c.keyName
+		ex, err := redisClient.Exists(c.mq.ctx, msgkey).Result()
 		if err != nil {
 			return err
 		}
-		if ex == 1 {
+		if ex == 0 {
+			messageList := make([]*apimodel.Message, 0)
 			// 从数据库拉取所有我发的消息
 			resp, err := rpc.GetMessageList(c.mq.ctx, &message.GetMessageListRequest{
 				FromUserId: fromUserID,
 				ToUserId:   friendIds[i],
-				PreMsgTime: time.Now().Unix(),
+				PreMsgTime: 0,
 			})
-			if err != nil {
-				return nil
-			}
-			// 存入缓存
-			err = c.SaveMessage(apimodel.PackMessages(resp.MessageList))
 			if err != nil {
 				return err
 			}
-		}
-		msgkey = md5.Sum([]byte(strconv.FormatInt(friendIds[i], 10) + strconv.FormatInt(fromUserID, 10) + c.keyName))
-		ex, err = redisClient.Exists(c.mq.ctx, string(msgkey[:])).Result()
-		if err != nil {
-			return err
-		}
-		if ex == 1 {
+			messageList = append(messageList, apimodel.PackMessages(resp.MessageList)...)
 			// 从数据库拉取所有发给我的消息
-			resp, err := rpc.GetMessageList(c.mq.ctx, &message.GetMessageListRequest{
+			resp, err = rpc.GetMessageList(c.mq.ctx, &message.GetMessageListRequest{
 				FromUserId: friendIds[i],
 				ToUserId:   fromUserID,
 				PreMsgTime: time.Now().Unix(),
 			})
 			if err != nil {
-				return nil
+				return err
 			}
+			messageList = append(messageList, apimodel.PackMessages(resp.MessageList)...)
 			// 存入缓存
-			err = c.SaveMessage(apimodel.PackMessages(resp.MessageList))
+			err = c.SaveMessage(messageList)
 			if err != nil {
 				return err
 			}
 		}
+
 	}
 	return nil
 }
 
 func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime int64) ([]*apimodel.Message, bool, error) {
 	messageList := make([]*apimodel.Message, 0)
-	// log.Println(fromUserID, toUserID)
-	// msgkey := md5.Sum([]byte(strconv.FormatInt(fromUserID, 10) + strconv.FormatInt(toUserID, 10) + c.keyname))
 	msgkey := strconv.FormatUint(c.hash_key(fromUserID, toUserID), 10) + c.keyName
 	ex, err := redisClient.Exists(c.mq.ctx, msgkey).Result()
 	if err != nil {
@@ -270,6 +261,10 @@ func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime i
 	}
 	if ex == 0 {
 		return nil, false, nil
+	}
+	_, err = redisClient.Expire(c.mq.ctx, msgkey, time.Hour*12).Result()
+	if err != nil {
+		return nil, false, err
 	}
 	values, err := redisClient.ZRangeByScore(c.mq.ctx, msgkey, &redis.ZRangeBy{
 		Min: strconv.FormatInt(preMsgTime, 10),
@@ -283,14 +278,14 @@ func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime i
 	for i := 0; i < len(values); i++ {
 		message := new(apimodel.Message)
 		err = json.Unmarshal([]byte(values[i]), &message)
+		if err != nil {
+			continue
+		}
 		//由于要返回>preMsgTime的记录，因此需要剔除掉preMsgTime处的记录
 		if message.CreateTime == preMsgTime {
 			continue
 		}
 		messageList = append(messageList, message)
-		if err != nil {
-			continue
-		}
 	}
 	return messageList, true, nil
 }

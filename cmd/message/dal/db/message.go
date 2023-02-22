@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 	"mydouyin/pkg/consts"
 	"time"
 )
@@ -26,6 +27,7 @@ func (u *Message) TableName() string {
 
 // CreateMessage create message info
 func CreateMessage(ctx context.Context, messages []*Message) (id, create_time int64, err error) {
+	log.Println(messages[0].Content)
 	result := DB.WithContext(ctx).Create(messages)
 	if result.Error != nil {
 		err = result.Error
