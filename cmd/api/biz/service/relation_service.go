@@ -66,9 +66,13 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 	var err error
 	// users := make([]*apimodel.User, 0)
 	userIds := make([]int64, 0)
+	userId, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		return resp, err
+	}
 	switch option {
 	case 1:
-		rpc_resp, err := rpc.GetFollow(s.ctx, &relation.GetFollowListRequest{FollowerId: int64(user.UserID)})
+		rpc_resp, err := rpc.GetFollow(s.ctx, &relation.GetFollowListRequest{FollowerId: int64(userId)})
 		if err != nil {
 			return resp, err
 		}
@@ -80,7 +84,7 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 		}
 		userIds = rpc_resp.FollowIds
 	case 2:
-		rpc_resp, err := rpc.GetFollower(s.ctx, &relation.GetFollowerListRequest{FollowId: int64(user.UserID)})
+		rpc_resp, err := rpc.GetFollower(s.ctx, &relation.GetFollowerListRequest{FollowId: int64(userId)})
 		if err != nil {
 			return resp, err
 		}
@@ -104,9 +108,16 @@ func (s *RelationService) FollowAndFollowerList(req apimodel.FollowAndFollowerLi
 	for _, rpc_user := range ur.Users {
 		switch option {
 		case 1:
-			u := apimodel.PackUser(rpc_user)
-			u.IsFollow = true
-			resp.UserList = append(resp.UserList, u)
+			if user.UserID == int64(userId) {
+				//看的自己的关注列表，IsFollow肯定都是true
+				u := apimodel.PackUser(rpc_user)
+				u.IsFollow = true
+				resp.UserList = append(resp.UserList, u)
+			} else {
+				//看的别人的关注列表，需要掉rpc查IsFollow
+				u := apimodel.PackUserRelation(rpc_user, int64(user.UserID))
+				resp.UserList = append(resp.UserList, u)
+			}
 		case 2:
 			u := apimodel.PackUserRelation(rpc_user, int64(user.UserID))
 			resp.UserList = append(resp.UserList, u)

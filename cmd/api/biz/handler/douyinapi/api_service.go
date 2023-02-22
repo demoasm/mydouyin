@@ -192,7 +192,6 @@ func GetUser(ctx context.Context, c *app.RequestContext) {
 		resp.Send(c)
 	}
 
-
 	resp.SetErr(errno.Success)
 	resp.Send(c)
 }
@@ -315,7 +314,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	resp.Send(c)
 }
 
-// @router /douyin/relation/friend/list/ [GET] 开发中....
+// @router /douyin/relation/friend/list/ [GET]
 func FriendList(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req apimodel.FriendListRequest
@@ -335,7 +334,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	resp.Send(c)
 }
 
-// @router /douyin/message/chat/ [GET] 开发中....
+// @router /douyin/message/chat/ [GET]
 func MessageChat(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req apimodel.MessageChatRequest
@@ -359,7 +358,7 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 	resp.Send(c)
 }
 
-// @router /douyin/message/action/ [POST] 开发中....
+// @router /douyin/message/action/ [POST]
 func MessageAction(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req apimodel.MessageActionRequest

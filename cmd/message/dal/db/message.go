@@ -27,6 +27,7 @@ func (u *Message) TableName() string {
 
 // CreateMessage create message info
 func CreateMessage(ctx context.Context, messages []*Message) (id, create_time int64, err error) {
+	log.Println(messages[0].Content)
 	result := DB.WithContext(ctx).Create(messages)
 	if result.Error != nil {
 		err = result.Error
@@ -54,12 +55,14 @@ func MGetFirstMessage(ctx context.Context, userID int64, friendIDs []int64) ([]*
 	if err := tx.Select("to_user_id,max(created_at) as created_at").Where("from_user_id = ? AND to_user_id in ?", userID, friendIDs).Group("to_user_id").Find(&msg1).Error; err != nil {
 		return nil, err
 	}
-	log.Println(len(msg1), msg1[0].CreatedAt, msg1[0].ToUserID)
+	// log.Println(len(msg1), msg1[0].CreatedAt, msg1[0].ToUserID)
 	if err := tx.Select("from_user_id,max(created_at) as created_at").Where("to_user_id = ? AND from_user_id in ?", userID, friendIDs).Group("from_user_id").Find(&msg2).Error; err != nil {
 		return nil, err
 	}
-	log.Println(msg2[0].CreatedAt, msg2[0].FromUserID)
-
+	// log.Println(msg2[0].CreatedAt, msg2[0].FromUserID)
+	// if len(msg1) == 0 && len(msg2) == 0 {
+	// 	return
+	// }
 	msg1_map, msg2_map := make(map[int64]time.Time, 0), make(map[int64]time.Time, 0)
 	for _, m := range msg1 {
 		msg1_map[int64(m.ToUserID)] = m.CreatedAt

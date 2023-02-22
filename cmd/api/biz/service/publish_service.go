@@ -8,6 +8,7 @@ import (
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/errno"
+	"strconv"
 )
 
 type PublishService struct {
@@ -34,8 +35,12 @@ func (s *PublishService) PublishVideo(req apimodel.PublishVideoRequest, user *ap
 
 func (s *PublishService) GetPublishList(req apimodel.GetPublishListRequest, user *apimodel.User) (*apimodel.GetPublishListResponse, error) {
 	resp := new(apimodel.GetPublishListResponse)
+	userId, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		return resp, err
+	}
 	rpc_resp, err := rpc.GetList(s.ctx, &douyinvideo.GetListRequest{
-		UserId: user.UserID,
+		UserId: int64(userId),
 	})
 	if err != nil {
 		return nil, err

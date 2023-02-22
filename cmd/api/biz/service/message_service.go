@@ -8,6 +8,7 @@ import (
 	"mydouyin/kitex_gen/message"
 	"mydouyin/pkg/errno"
 	"sort"
+	"time"
 )
 
 type MessageService struct {
@@ -31,6 +32,16 @@ func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *
 
 func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apimodel.User) (resp *apimodel.MessageChatResponse, err error) {
 	resp = new(apimodel.MessageChatResponse)
+	if time.Now().Unix() < req.PreMsgTime {
+		//客户端返回的毫秒级时间戳，需要转化成秒级
+		// req.PreMsgTime = req.PreMsgTime / 1e3
+		req.PreMsgTime, err = cache.MC.GetLastedMsg(user.UserID, req.ToUserId)
+		// log.Println(req.PreMsgTime, err)
+		if err != nil {
+			return
+		}
+	}
+	// log.Println(req.PreMsgTime, time.Now().Unix() > req.PreMsgTime)
 	messageList, hit, err := cache.MC.GetMessage(user.UserID, req.ToUserId, req.PreMsgTime)
 	if err != nil {
 		return
@@ -65,6 +76,11 @@ func (s *MessageService) MessageChat(req apimodel.MessageChatRequest, user *apim
 	message_list_to := apimodel.PackMessages(rpc_resp_to.MessageList)
 	resp.MessageList = append(message_list_from, message_list_to...)
 	sort.Sort(apimodel.MessageSorter(resp.MessageList))
-	cache.MC.SaveMessage(resp.MessageList)
+	if len(resp.MessageList) == 0 {
+		//表示两个用户之间第一次聊天，没有消息记录，向对应kv缓存中加一条空消息，防止service轮询rpc接口
+		cache.MC.SaveMessage(append([]*apimodel.Message{}, &apimodel.Message{FromUserId: user.UserID, ToUserId: req.ToUserId, CreateTime: 0}))
+	} else {
+		cache.MC.SaveMessage(resp.MessageList)
+	}
 	return
 }
