@@ -24,7 +24,9 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) GetFeed(req apimodel.GetFeedRequest, userId int64) (*apimodel.GetFeedResponse, error) {
 	resp := new(apimodel.GetFeedResponse)
 	var err error
-
+	if len(req.LatestTime) > 10 {
+		req.LatestTime = string([]rune(req.LatestTime[0 : len(req.LatestTime)-3]))
+	}
 	rpcResp, err := rpc.GetFeed(s.ctx, &douyinvideo.GetFeedRequest{
 		LatestTime: req.LatestTime,
 		UserId:     userId,

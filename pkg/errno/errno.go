@@ -34,6 +34,7 @@ var (
 	UserAlreadyExistErr    = NewErrNo(int64(douyinuser.ErrCode_UserAlreadyExistErrCode), "User already exists")
 	AuthorizationFailedErr = NewErrNo(int64(douyinuser.ErrCode_AuthorizationFailedErrCode), "Authorization failed")
 	QueryErr               = NewErrNo(int64(douyinuser.ErrCode_QueryErrCode), "Query database error")
+	ExceedAuthorization    = NewErrNo(10006, "Exceed your authority")
 )
 
 // ConvertErr convert error to Errno

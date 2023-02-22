@@ -6,20 +6,23 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"math"
 	"mydouyin/cmd/api/biz/apimodel"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/message"
 	"mydouyin/kitex_gen/relation"
 	"mydouyin/pkg/errno"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
 type MessageCache struct {
-	keyName string
-	mq      *CommandQueue
+	keyName         string
+	mq              *CommandQueue
+	lasted_time_map sync.Map
 }
 
 type CreateMessageCommand struct {
@@ -34,7 +37,24 @@ func initMessageCache() {
 	MC = new(MessageCache)
 	MC.keyName = "message_list"
 	MC.mq = NewCommandQueue(context.Background(), "message")
+
 	go MC.listen()
+}
+
+//获取from_user_id最新发给to_uer_id的消息
+func (c *MessageCache) GetLastedMsg(from_user_id, to_user_id int64) (lastedTime int64, err error) {
+	var msg interface{}
+	var ok bool = false
+	for !ok {
+		msg, ok = c.lasted_time_map.Load(strconv.FormatInt(from_user_id, 10) + strconv.FormatInt(to_user_id, 10))
+		time.Sleep(50 * time.Millisecond)
+	}
+	lastedTime = msg.(*apimodel.Message).CreateTime
+	return
+}
+
+func (c *MessageCache) PushLastedMsg(msg *apimodel.Message) {
+	c.lasted_time_map.Store(strconv.FormatInt(msg.FromUserId, 10)+strconv.FormatInt(msg.ToUserId, 10), msg)
 }
 
 func (c *MessageCache) listen() {
@@ -78,6 +98,7 @@ func (c *MessageCache) execCommand(cmd *CreateMessageCommand) error {
 		Content:    cmd.Content,
 	}
 	err = c.SaveMessage([]*apimodel.Message{&msg})
+	c.PushLastedMsg(&msg)
 	return err
 }
 
@@ -167,9 +188,9 @@ func (c *MessageCache) SaveMessage(messages []*apimodel.Message) error {
 		if messages[i].CreateTime > frist_msg.CreateTime {
 			frist_msg = messages[i]
 		}
+		msgKey := strconv.FormatUint(c.hash_key(messages[i].FromUserId, messages[i].ToUserId), 10) + c.keyName
 		message, _ := json.Marshal(messages[i])
 		// msgKey := md5.Sum([]byte(strconv.FormatInt(messages[i].ID, 10) + strconv.FormatInt(messages[i].ToUserId, 10) + c.keyname))
-		msgKey := strconv.FormatUint(c.hash_key(messages[i].FromUserId, messages[i].ToUserId), 10) + c.keyName
 		_, err := redisClient.ZAdd(c.mq.ctx, msgKey, &redis.Z{Score: float64(messages[i].CreateTime), Member: message}).Result()
 		if err != nil {
 			return err
@@ -250,14 +271,22 @@ func (c *MessageCache) GetMessage(fromUserID int64, toUserID int64, preMsgTime i
 	if ex == 0 {
 		return nil, false, nil
 	}
-	values, err := redisClient.ZRange(c.mq.ctx, msgkey, preMsgTime, -1).Result()
+	values, err := redisClient.ZRangeByScore(c.mq.ctx, msgkey, &redis.ZRangeBy{
+		Min: strconv.FormatInt(preMsgTime, 10),
+		Max: strconv.FormatInt(math.MaxInt64, 10),
+	}).Result()
 	// log.Println(values)
 	if err != nil {
 		return nil, false, err
 	}
+
 	for i := 0; i < len(values); i++ {
 		message := new(apimodel.Message)
 		err = json.Unmarshal([]byte(values[i]), &message)
+		//由于要返回>preMsgTime的记录，因此需要剔除掉preMsgTime处的记录
+		if message.CreateTime == preMsgTime {
+			continue
+		}
 		messageList = append(messageList, message)
 		if err != nil {
 			continue

@@ -44,8 +44,12 @@ func (s *FavoriteService) FavoriteAction(req apimodel.FavoriteActionRequest, use
 func (s *FavoriteService) GetFavoriteList(req apimodel.GetFavoriteListRequest, user *apimodel.User) (*apimodel.GetFavoriteListResponse, error) {
 	resp := new(apimodel.GetFavoriteListResponse)
 	var err error
+	userId, err := strconv.Atoi(req.UserId)
+	if err != nil {
+		return resp, err
+	}
 	vids, err := rpc.GetFavouriteList(s.ctx, &douyinfavorite.GetListRequest{
-		UserId: user.UserID,
+		UserId: int64(userId),
 	})
 	if err != nil {
 		return nil, err
