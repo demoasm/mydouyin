@@ -1,9 +1,11 @@
 package test
 
 import (
-	"github.com/stretchr/testify/assert"
+	//"fmt"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFavorite(t *testing.T) {
@@ -32,8 +34,13 @@ func TestFavorite(t *testing.T) {
 		Status(http.StatusOK).
 		JSON().Object()
 	favoriteListResp.Value("status_code").Number().Equal(0)
+	
+	//fmt.Println("*************", favoriteListResp)
+
 	for _, element := range favoriteListResp.Value("video_list").Array().Iter() {
+		
 		video := element.Object()
+		//fmt.Println("*************", video.Value("id").Number().Raw())
 		video.ContainsKey("id")
 		video.ContainsKey("author")
 		video.Value("play_url").String().NotEmpty()
@@ -69,16 +76,19 @@ func TestComment(t *testing.T) {
 		Status(http.StatusOK).
 		JSON().Object()
 	commentListResp.Value("status_code").Number().Equal(0)
+
 	containTestComment := false
 	for _, element := range commentListResp.Value("comment_list").Array().Iter() {
+
 		comment := element.Object()
-		comment.ContainsKey("id")
-		comment.ContainsKey("user")
-		comment.Value("content").String().NotEmpty()
-		comment.Value("create_date").String().NotEmpty()
 		if int(comment.Value("id").Number().Raw()) == commentId {
 			containTestComment = true
 		}
+		comment.ContainsKey("id")
+		comment.ContainsKey("user")
+		comment.Value("content").String().NotEmpty()
+		//fmt.Println("****************", comment.Value("create_date").String())
+		comment.Value("create_date").String().NotEmpty()
 	}
 
 	assert.True(t, containTestComment, "Can't find test comment in list")

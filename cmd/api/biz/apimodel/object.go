@@ -134,7 +134,7 @@ type Comment struct {
 	CommentID  int64  `form:"id" json:"id" query:"id"`
 	Commentor  User   `form:"user" json:"user" query:"user"`
 	Content    string `form:"content" json:"content" query:"content"`
-	CreateDate string `form:"create_data" json:"create_data" query:"create_data"`
+	CreateDate string `form:"create_date" json:"create_date" query:"create_date"`
 }
 
 func PackComment(douyin_comment *douyincomment.Comment) *Comment {

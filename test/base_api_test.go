@@ -51,8 +51,10 @@ func TestUserAction(t *testing.T) {
 	loginResp.Value("token").String().Length().Gt(0)
 
 	token := loginResp.Value("token").String().Raw()
+	user_id := loginResp.Value("user_id").Number().Raw()
 	userResp := e.GET("/douyin/user/").
 		WithQuery("token", token).
+		WithQuery("user_id", user_id).
 		Expect().
 		Status(http.StatusOK).
 		JSON().Object()
