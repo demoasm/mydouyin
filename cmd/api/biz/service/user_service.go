@@ -49,11 +49,6 @@ func (s *UserService) GetUser(req apimodel.GetUserRequest) (*apimodel.GetUserRes
 		return resp, err
 	}
 
-	// err = cache.MC.InitMessageFromDB(int64(id))
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	rpc_resp, err := rpc.MGetUser(s.ctx, &douyinuser.MGetUserRequest{UserIds: []int64{int64(id)}})
 	if err != nil {
 		return nil, err

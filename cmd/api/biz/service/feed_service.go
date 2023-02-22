@@ -8,6 +8,7 @@ import (
 	"mydouyin/kitex_gen/douyinuser"
 	"mydouyin/kitex_gen/douyinvideo"
 	"mydouyin/pkg/errno"
+	"strconv"
 	"time"
 )
 
@@ -24,6 +25,9 @@ func NewFeedService(ctx context.Context) *FeedService {
 func (s *FeedService) GetFeed(req apimodel.GetFeedRequest, userId int64) (*apimodel.GetFeedResponse, error) {
 	resp := new(apimodel.GetFeedResponse)
 	var err error
+	if req.LatestTime == "" {
+		req.LatestTime = strconv.FormatInt(time.Now().Unix(), 10)
+	}
 	if len(req.LatestTime) > 10 {
 		req.LatestTime = string([]rune(req.LatestTime[0 : len(req.LatestTime)-3]))
 	}
