@@ -33,6 +33,7 @@ CREATE TABLE `video`
     `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'video delete time',
     PRIMARY KEY (`id`),
     KEY          `idx_author_id` (`author`) COMMENT 'Author id index',
+    UNIQUE KEY   (`created_at`),
     CONSTRAINT   `author_id` FOREIGN KEY (`author`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Video information table';
 
@@ -88,6 +89,7 @@ CREATE TABLE `message`
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'video upload time',
     PRIMARY KEY (`id`),
     KEY          `idx_user_id_video_id` (`from_user_id`, `to_user_id`) COMMENT 'User id and Video id index',
+    KEY (`created_at`),
     CONSTRAINT   `from_user_id` FOREIGN KEY (`to_user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT   `to_user_id` FOREIGN KEY (`from_user_id`) REFERENCES `user` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Messsage information table';
