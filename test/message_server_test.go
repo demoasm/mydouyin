@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func TestMessageServer(t *testing.T) {
-	e := newExpect(t)
+func BenchmarkTestMessageServer(b *testing.B) {
+	e := newExpect(b)
 	userIdA, _ := getTestUserToken(testUserA, e)
 	userIdB, _ := getTestUserToken(testUserB, e)
 

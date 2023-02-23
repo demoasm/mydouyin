@@ -10,16 +10,18 @@ var serverAddr = "http://localhost:8080"
 var testUserA = "douyinTestUserA"
 var testUserB = "douyinTestUserB"
 
-func newExpect(t *testing.T) *httpexpect.Expect {
+func newExpect(b *testing.B) *httpexpect.Expect {
 	return httpexpect.WithConfig(httpexpect.Config{
 		Client:   http.DefaultClient,
 		BaseURL:  serverAddr,
-		Reporter: httpexpect.NewAssertReporter(t),
+		Reporter: httpexpect.NewAssertReporter(b),
 		Printers: []httpexpect.Printer{
-			httpexpect.NewDebugPrinter(t, true),
+			httpexpect.NewDebugPrinter(b, true),
 		},
 	})
 }
+
+
 
 func getTestUserToken(user string, e *httpexpect.Expect) (int, string) {
 	registerResp := e.POST("/douyin/user/register/").

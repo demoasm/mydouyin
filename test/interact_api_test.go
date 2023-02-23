@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFavorite(t *testing.T) {
-	e := newExpect(t)
+func BenchmarkTestFavorite(b *testing.B) {
+	e := newExpect(b)
 
 	feedResp := e.GET("/douyin/feed/").Expect().Status(http.StatusOK).JSON().Object()
 	feedResp.Value("status_code").Number().Equal(0)
@@ -34,11 +34,11 @@ func TestFavorite(t *testing.T) {
 		Status(http.StatusOK).
 		JSON().Object()
 	favoriteListResp.Value("status_code").Number().Equal(0)
-	
+
 	//fmt.Println("*************", favoriteListResp)
 
 	for _, element := range favoriteListResp.Value("video_list").Array().Iter() {
-		
+
 		video := element.Object()
 		//fmt.Println("*************", video.Value("id").Number().Raw())
 		video.ContainsKey("id")
@@ -46,10 +46,26 @@ func TestFavorite(t *testing.T) {
 		video.Value("play_url").String().NotEmpty()
 		video.Value("cover_url").String().NotEmpty()
 	}
+
+	favoriteResp = e.POST("/douyin/favorite/action/").
+		WithQuery("token", token).WithQuery("video_id", videoId).WithQuery("action_type", 2).
+		WithFormField("token", token).WithFormField("video_id", videoId).WithFormField("action_type", 2).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object()
+	favoriteResp.Value("status_code").Number().Equal(0)
+
+	favoriteListResp = e.GET("/douyin/favorite/list/").
+		WithQuery("token", token).WithQuery("user_id", userId).
+		WithFormField("token", token).WithFormField("user_id", userId).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object()
+	favoriteListResp.Value("status_code").Number().Equal(0)
 }
 
-func TestComment(t *testing.T) {
-	e := newExpect(t)
+func BenchmarkTestComment(b *testing.B) {
+	e := newExpect(b)
 
 	feedResp := e.GET("/douyin/feed/").Expect().Status(http.StatusOK).JSON().Object()
 	feedResp.Value("status_code").Number().Equal(0)
@@ -91,7 +107,7 @@ func TestComment(t *testing.T) {
 		comment.Value("create_date").String().NotEmpty()
 	}
 
-	assert.True(t, containTestComment, "Can't find test comment in list")
+	assert.True(b, containTestComment, "Can't find test comment in list")
 
 	delCommentResp := e.POST("/douyin/comment/action/").
 		WithQuery("token", token).WithQuery("video_id", videoId).WithQuery("action_type", 2).WithQuery("comment_id", commentId).

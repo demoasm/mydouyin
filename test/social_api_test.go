@@ -1,13 +1,14 @@
 package test
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestRelation(t *testing.T) {
-	e := newExpect(t)
+func BenchmarkTestRelation(b *testing.B) {
+	e := newExpect(b)
 
 	userIdA, tokenA := getTestUserToken(testUserA, e)
 	userIdB, tokenB := getTestUserToken(testUserB, e)
@@ -36,7 +37,7 @@ func TestRelation(t *testing.T) {
 			containTestUserB = true
 		}
 	}
-	assert.True(t, containTestUserB, "Follow test user failed")
+	assert.True(b, containTestUserB, "Follow test user failed")
 
 	followerListResp := e.GET("/douyin/relation/follower/list/").
 		WithQuery("token", tokenB).WithQuery("user_id", userIdB).
@@ -54,11 +55,20 @@ func TestRelation(t *testing.T) {
 			containTestUserA = true
 		}
 	}
-	assert.True(t, containTestUserA, "Follower test user failed")
+	assert.True(b, containTestUserA, "Follower test user failed")
+
+	relationResp = e.POST("/douyin/relation/action/").
+		WithQuery("token", tokenA).WithQuery("to_user_id", userIdB).WithQuery("action_type", 2).
+		WithFormField("token", tokenA).WithFormField("to_user_id", userIdB).WithFormField("action_type", 2).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object()
+	relationResp.Value("status_code").Number().Equal(0)
+
 }
 
-func TestChat(t *testing.T) {
-	e := newExpect(t)
+func BenchmarkTestChat(b *testing.B) {
+	e := newExpect(b)
 
 	userIdA, tokenA := getTestUserToken(testUserA, e)
 	userIdB, tokenB := getTestUserToken(testUserB, e)
