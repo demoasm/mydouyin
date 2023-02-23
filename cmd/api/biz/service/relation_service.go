@@ -153,10 +153,12 @@ func (s *RelationService) FriendList(req apimodel.FriendListRequest) (*apimodel.
 	if ur.BaseResp.StatusCode != 0 {
 		return resp, errno.NewErrNo(ur.BaseResp.StatusCode, ur.BaseResp.StatusMessage)
 	}
+	friend_map := make(map[int64]*apimodel.FriendUser, 0)
 	for _, rpc_user := range ur.Users {
 		u := apimodel.PackFriendUser(rpc_user)
 		u.IsFollow = true
 		resp.UserList = append(resp.UserList, u)
+		friend_map[u.UserID] = u
 	}
 
 	//先走缓存，从缓存中查看能不能得到friendlist
@@ -164,14 +166,16 @@ func (s *RelationService) FriendList(req apimodel.FriendListRequest) (*apimodel.
 	missFriendId := make([]int64, 0)
 	missFriend := make(map[int64]*apimodel.FriendUser, 0)
 	// log.Println("cache中查到的fristlist:")
-	for i, frist_msg := range frist_msg_list {
+	for _, frist_msg := range frist_msg_list {
 		if frist_msg.MsgType == -1 {
 			//miss了
 			missFriendId = append(missFriendId, frist_msg.FriendId)
-			missFriend[resp.UserList[i].UserID] = resp.UserList[i]
+			missFriend[frist_msg.FriendId] = friend_map[frist_msg.FriendId]
 		} else {
-			resp.UserList[i].Message = frist_msg.Content
-			resp.UserList[i].MsgType = int64(frist_msg.MsgType)
+			friend_map[frist_msg.FriendId].Message = frist_msg.Content
+			friend_map[frist_msg.FriendId].MsgType = int64(frist_msg.MsgType)
+			// resp.UserList[i].Message = frist_msg.Content
+			// resp.UserList[i].MsgType = int64(frist_msg.MsgType)
 		}
 	}
 	// log.Println("miss的friendId", missFriendId)
