@@ -9,6 +9,7 @@ import (
 	"mydouyin/pkg/errno"
 	"sort"
 	"time"
+	//"time"
 )
 
 type MessageService struct {
@@ -24,6 +25,7 @@ func NewMessageService(ctx context.Context) *MessageService {
 func (s *MessageService) MessageAction(req apimodel.MessageActionRequest, user *apimodel.User) (resp *apimodel.MessageActionResponse, err error) {
 	resp = new(apimodel.MessageActionResponse)
 	err = cache.MC.CommitCreateMessageCommand(user.UserID, req.ToUserId, req.Content)
+	//err = cache.MC.CommitCreateMessageCommandV0(user.UserID, req.ToUserId, req.Content)
 	if err != nil {
 		return resp, err
 	}

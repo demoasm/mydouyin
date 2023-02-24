@@ -138,3 +138,39 @@ func (vh *VideoHandel) UpLoadVideo(data *multipart.FileHeader) (videoName string
 	err = vh.bucket.PutObject(videoName, filepoint)
 	return
 }
+
+func (vh *VideoHandel) UpLoadVideoV0(data *multipart.FileHeader, userID int64, title string) (err error) {
+	var filepoint multipart.File
+	filepoint, err = data.Open()
+	if err != nil {
+		return
+	}
+	defer filepoint.Close()
+	// 上传视频
+	videoName := "videos/" + time.Now().Format("2006-01-02-15:04:05") + ".mp4"
+	err = vh.bucket.PutObject(videoName, filepoint)
+
+	cover_name := "cover/" + time.Now().Format("2006-01-02-15:04:05") + ".jpg"
+	style := "video/snapshot,t_1000,f_jpg,w_0,h_0,m_fast"
+	// 根据视频名直接获取截图url
+	process := fmt.Sprintf("%s|sys/saveas,o_%v,b_%v", style, base64.URLEncoding.EncodeToString([]byte(cover_name)), base64.URLEncoding.EncodeToString([]byte(consts.Bucket)))
+	result, err := VH.bucket.ProcessObject(videoName, process)
+	log.Println(result.Status)
+	if err != nil {
+		return err
+	}
+	//调rpc写库
+	resp, err := rpc.CreateVideo(context.Background(), &douyinvideo.CreateVideoRequest{
+		Author:   userID,
+		PlayUrl:  videoName,
+		CoverUrl: cover_name,
+		Title:    title,
+	})
+	if err != nil {
+		return err
+	}
+	if resp.BaseResp.StatusCode != 0 {
+		return errno.NewErrNo(resp.BaseResp.StatusCode, resp.BaseResp.StatusMessage)
+	}
+	return nil
+}

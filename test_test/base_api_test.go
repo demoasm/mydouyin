@@ -7,8 +7,9 @@ import (
 	"testing"
 	"time"
 )
-func BenchmarkTestFeed(b *testing.B) {
-	e:=newExpect(b)
+func TestFeed(t *testing.T) {
+	e:=newExpect(t)
+	
 	feedResp := e.GET("/douyin/feed/").Expect().Status(http.StatusOK).JSON().Object()
 	feedResp.Value("status_code").Number().Equal(0)
 	feedResp.Value("video_list").Array().Length().Gt(0)
@@ -19,12 +20,11 @@ func BenchmarkTestFeed(b *testing.B) {
 		video.Value("play_url").String().NotEmpty()
 		video.Value("cover_url").String().NotEmpty()
 	}
-
 }
 
 
-func BenchmarkTestUserAction(b *testing.B) {
-	e := newExpect(b)
+func TestUserAction(t *testing.T) {
+	e := newExpect(t)
 
 	rand.Seed(time.Now().UnixNano())
 	registerValue := fmt.Sprintf("douyin%d", rand.Intn(65536))
@@ -64,8 +64,8 @@ func BenchmarkTestUserAction(b *testing.B) {
 	userInfo.Value("name").String().Length().Gt(0)
 }
 
-func BenchmarkTestPublish(b *testing.B) {
-	e := newExpect(b)
+func TestPublish(t *testing.T) {
+	e := newExpect(t)
 
 	userId, token := getTestUserToken(testUserA, e)
 

@@ -41,7 +41,7 @@ func initMessageCache() {
 	go MC.listen()
 }
 
-//获取from_user_id最新发给to_uer_id的消息
+// 获取from_user_id最新发给to_uer_id的消息
 func (c *MessageCache) GetLastedMsg(from_user_id, to_user_id int64) (lastedTime int64, err error) {
 	var msg interface{}
 	var ok bool = false
@@ -148,6 +148,16 @@ func (c *MessageCache) CommitCreateMessageCommand(from_user_id, to_user_id int64
 	}
 	data, _ := json.Marshal(cmd)
 	return c.mq.ProductionMessage(data)
+}
+
+func (c *MessageCache) CommitCreateMessageCommandV0(from_user_id, to_user_id int64, content string) error {
+	cmd := CreateMessageCommand{
+		FromUserId: from_user_id,
+		ToUserId:   to_user_id,
+		Content:    content,
+	}
+	return c.execCommand(&cmd)
+	// return c.mq.ProductionMessage(data)
 }
 
 func (c *MessageCache) GetFirstMessage(me int64, friendIds []int64) (frist_msg_list []*apimodel.FristMessage) {

@@ -60,7 +60,7 @@ func ValidRelationIfExist(ctx context.Context, follow_id, follower_id int64) (bo
 	return len(res) > 0, nil
 }
 
-//通过FollowId查询所有FollowerId
+// 通过FollowId查询所有FollowerId
 func GetFollowersByFollow(ctx context.Context, follow_id int64) ([]*Relation, error) {
 	res := make([]*Relation, 0)
 	if err := DB.WithContext(ctx).Where("follow_id = ?", follow_id).Select("follower_id").Find(&res).Error; err != nil {
@@ -69,7 +69,7 @@ func GetFollowersByFollow(ctx context.Context, follow_id int64) ([]*Relation, er
 	return res, nil
 }
 
-//通过FollowerId查询所有FollowId
+// 通过FollowerId查询所有FollowId
 func GetFollowsByFollower(ctx context.Context, follower_id int64) ([]*Relation, error) {
 	res := make([]*Relation, 0)
 	if err := DB.WithContext(ctx).Where("follower_id = ?", follower_id).Select("follow_id").Find(&res).Error; err != nil {
@@ -81,7 +81,7 @@ func GetFollowsByFollower(ctx context.Context, follower_id int64) ([]*Relation, 
 func GetFriend(ctx context.Context, me int64) ([]int64, error) {
 	res := make([]int64, 0)
 	if err := DB.WithContext(ctx).Table("relation as a").Distinct("a.follow_id as friend_id").
-		Joins("inner join relation as  b on a.follower_id = ? and b.follower_id = ?", me, me).
+		Joins("inner join relation as  b on a.follower_id = ? and b.follow_id = ?", me, me).
 		Find(&res).Error; err != nil {
 		return nil, err
 	}

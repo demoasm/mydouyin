@@ -23,14 +23,15 @@ func NewPublishService(ctx context.Context) *PublishService {
 
 func (s *PublishService) PublishVideo(req apimodel.PublishVideoRequest, user *apimodel.User) (*apimodel.PublishVideoResponse, error) {
 	resp := new(apimodel.PublishVideoResponse)
-	videoName, err := videohandel.VH.UpLoadVideo(req.Data)
+	//err := videohandel.VH.UpLoadVideoV0(req.Data, user.UserID, req.Title)
+    videoName, err := videohandel.VH.UpLoadVideo(req.Data)
 	if err != nil {
 		return resp, err
 	}
 
 	go videohandel.VH.CommitCommand(videoName, user.UserID, req.Title)
 
-	return resp, nil
+	return resp, err
 }
 
 func (s *PublishService) GetPublishList(req apimodel.GetPublishListRequest, user *apimodel.User) (*apimodel.GetPublishListResponse, error) {
