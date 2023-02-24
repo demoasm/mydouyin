@@ -1,7 +1,7 @@
 *.mp4
 *.jpg	  
 *.sh
-config
+pkg/consts/consts.go
 docker-compose.yaml
 .idea
 cmd/user/output/bin/douyinuser
