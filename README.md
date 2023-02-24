@@ -8,6 +8,7 @@
 
 DAO -> RPC -> 路由
 
+[pkg/consts/consts.go](https://github.com/demoasm/mydouyin/blob/master/pkg/consts/consts.go)
 
 #### 参与贡献
 
