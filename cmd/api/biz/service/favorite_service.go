@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mydouyin/cmd/api/biz/apimodel"
+	"mydouyin/cmd/api/biz/cache"
 	"mydouyin/cmd/api/biz/rpc"
 	"mydouyin/kitex_gen/douyinfavorite"
 	"mydouyin/kitex_gen/douyinuser"
@@ -27,17 +28,24 @@ func (s *FavoriteService) FavoriteAction(req apimodel.FavoriteActionRequest, use
 	if err != nil {
 		return resp, err
 	}
-	rpc_resp, err := rpc.FavoriteAction(s.ctx, &douyinfavorite.FavoriteActionRequest{
-		UserId:     user.UserID,
-		VideoId:    int64(videoId),
-		ActionType: req.ActionType,
-	})
+	//异步处理
+	err = cache.FC.CommitFavoriteActionCommand(
+		user.UserID,
+		int64(videoId),
+		req.ActionType,
+	)
+	//同步处理
+	// rpc_resp, err := rpc.FavoriteAction(s.ctx, &douyinfavorite.FavoriteActionRequest{
+	// 	UserId:     user.UserID,
+	// 	VideoId:    int64(videoId),
+	// 	ActionType: req.ActionType,
+	// })
 	if err != nil {
 		return resp, err
 	}
-	if rpc_resp.BaseResp.StatusCode != 0 {
-		return resp, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
-	}
+	// if rpc_resp.BaseResp.StatusCode != 0 {
+	// 	return resp, errno.NewErrNo(rpc_resp.BaseResp.StatusCode, rpc_resp.BaseResp.StatusMessage)
+	// }
 	return resp, nil
 }
 

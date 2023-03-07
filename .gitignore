@@ -1,8 +1,7 @@
 *.mp4
 *.jpg	  
-*.sh
-pkg/consts/consts.go
-docker-compose.yaml
+# *.sh
+# pkg/consts/consts.go
 .idea
 cmd/user/output/bin/douyinuser
 cmd/favorite/output/bin/favorite

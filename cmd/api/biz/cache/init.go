@@ -12,4 +12,5 @@ func Init() {
 	})
 	// initVideoCache()
 	initMessageCache()
+	initFavoriteCache()
 }
