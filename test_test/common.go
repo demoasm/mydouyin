@@ -10,13 +10,13 @@ var serverAddr = "http://localhost:8080"
 var testUserA = "douyinTestUserA"
 var testUserB = "douyinTestUserB"
 
-func newExpect(b *testing.B) *httpexpect.Expect {
+func newExpect(t *testing.T) *httpexpect.Expect {
 	return httpexpect.WithConfig(httpexpect.Config{
 		Client:   http.DefaultClient,
 		BaseURL:  serverAddr,
-		Reporter: httpexpect.NewAssertReporter(b),
+		Reporter: httpexpect.NewAssertReporter(t),
 		Printers: []httpexpect.Printer{
-			httpexpect.NewDebugPrinter(b, true),
+			httpexpect.NewDebugPrinter(t, true),
 		},
 	})
 }
